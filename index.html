@@ -2,6 +2,8 @@
 <html lang="it">
 <head>
 <meta charset="UTF-8">
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Edilkamin — Portale Tecnico</title>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
@@ -387,7 +389,7 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
     </div>
     <div style="margin-bottom:14px;">
       <label style="font:600 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--ink2);display:block;margin-bottom:5px;">Username</label>
-      <input class="f-in" id="login-user" placeholder="Il tuo username" onkeydown="if(event.key==='Enter')doLogin()">
+      <input class="f-in" id="login-user" placeholder="La tua email CAT" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div style="margin-bottom:20px;">
       <label style="font:600 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--ink2);display:block;margin-bottom:5px;">Password</label>
@@ -407,7 +409,7 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
       <div class="nav-logo-icon">EK</div>
       <div>
         <div class="nav-logo-name">EDILKAMIN</div>
-        <span class="nav-logo-sub">Portale Tecnico <!-- VERSIONE --> v4.0.0</span>
+        <span class="nav-logo-sub">Portale Tecnico <!-- VERSIONE --> v5.0.0</span>
       </div>
     </div>
     <div class="nav-right">
@@ -605,117 +607,303 @@ const today = () => new Date().toISOString().split('T')[0];
 const getVal = id => { const el = $(id); return el ? el.value.trim() : ''; };
 
 // ══════════════════════════════════════
-// DATABASE
+// SUPABASE CONFIG
 // ══════════════════════════════════════
+// ↓↓↓ INCOLLA QUI LE TUE CHIAVI SUPABASE ↓↓↓
+const SUPA_URL = 'https://TUO-PROGETTO.supabase.co';  // Project URL
+const SUPA_KEY = 'TUA-ANON-KEY';                       // anon/public key
+// ↑↑↑ ─────────────────────────────── ↑↑↑
+
+const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// ── DB in memoria (popolato da Supabase all'avvio) ──
 const DB = {
-  electronics: [
-    {id:'e1',name:'The Mind',icon:'🧠',desc:'WiFi integrato, Bluetooth, gestione via APP CAT EK63. Display touch.'},
-    {id:'e2',name:'LX64 WiFi',icon:'📡',desc:'Scheda LX64 con modulo WiFi LAN1, firmware aggiornabile via USB.'},
-    {id:'e3',name:'EBM',icon:'⚡',desc:'Per camini a pellet con estrattore EBM, encoder e sensore di flusso.'},
-    {id:'e4',name:'Classica Plus',icon:'🔧',desc:'Base per stufe a pellet con radiocomando a tasti fisici.'},
-  ],
-  families: [
-    {id:'f1',name:'Stufe a Pellet'},{id:'f2',name:'Termostufe Idro'},
-    {id:'f3',name:'Camini a Pellet'},{id:'f4',name:'Caldaie Pellet'},
-  ],
+  electronics: [], families: [], apps: [],
+  products: [], contents: [], params: [],
+  alarms: [], firmware: [], serials: [],
   productTypes: ['Stufa a pellet','Stufa a legna','Camino a legna','Inserto','Termostufa','Caldaia','Inserto idro'],
-  apps: [{id:'a1',name:'APP CAT EK63'},{id:'a2',name:'Edilkamin App'}],
-  products: [
-    {id:'p1',name:'Slim',emoji:'🔥',codes:['ASL05AIR.015','ASL05AIR.108','ASLIM'],type:'Stufa a pellet',elec:'e1',family:'f1',app:'a1',active:true,desc:'Stufa a pellet slim con The Mind, WiFi. 5 kW.'},
-    {id:'p2',name:'Iris Plus',emoji:'🌟',codes:['IRIS_PLUS_7_AA03_001','AIRIS'],type:'Stufa a pellet',elec:'e4',family:'f1',app:'a2',active:true,desc:'Stufa a pellet frontale 7 livelli.'},
-    {id:'p3',name:'Gora Slim',emoji:'🏔',codes:['AGORA','GORA_SLIM'],type:'Stufa a pellet',elec:'e1',family:'f1',app:'a1',active:true,desc:'Gora Slim con The Mind.'},
-    {id:'p4',name:'Gora 2 Slim Up',emoji:'🏔',codes:['AGORA2'],type:'Stufa a pellet',elec:'e1',family:'f1',app:'a1',active:true,desc:'Evoluzione Gora Slim display touch.'},
-    {id:'p5',name:'Aris Plus',emoji:'💨',codes:['AARISAAIR.022','AARIS'],type:'Stufa a pellet',elec:'e2',family:'f1',app:'a2',active:true,desc:'Con boiler opzionale e WiFi LX64.'},
-    {id:'p6',name:'Pellkamin 10 Evo',emoji:'🔆',codes:['PELLKAMIN_10_WIFI','APKAMIN'],type:'Inserto',elec:'e3',family:'f3',app:'a2',active:true,desc:'Camino a pellet da incasso EBM.'},
-    {id:'p7',name:'Kikka Plus',emoji:'🌿',codes:['KIKKAPLUS_AA03_001','AKIKKA'],type:'Stufa a pellet',elec:'e4',family:'f1',app:'a2',active:true,desc:'Stufa con sistema E-Brusher.'},
-    {id:'p8',name:'Maxima 24',emoji:'♨️',codes:['MAXIMA-24_V2.4','AMAXIMA'],type:'Termostufa',elec:'e2',family:'f2',app:'a2',active:true,desc:'Termostufa idro 24 kW, 10 livelli.'},
-    {id:'p9',name:'Nara Plus',emoji:'🌊',codes:['AARPLAAIR.022','ANARA'],type:'Stufa a pellet',elec:'e2',family:'f1',app:'a2',active:true,desc:'Nara Plus radiocomando touch.'},
-    {id:'p10',name:'Pellet-Blok',emoji:'🏗',codes:['PELLET_BLOK_V2015'],type:'Inserto',elec:'e2',family:'f3',app:'a2',active:false,desc:'Inserto a pellet 2rpm/3.3rpm.'},
-  ],
-  contents: [
-    {id:'c1',title:'Guida Wi-Fi The Mind',type:'wifi',level:'electronic',entity:'e1',excl:[],desc:'Procedura configurazione WiFi e Bluetooth per The Mind.',url:'#',rev:'v3.2',date:'2025-10-15',visible:true},
-    {id:'c2',title:'APP CAT EK63 Guida Tecnico',type:'documento',level:'electronic',entity:'e1',excl:[],desc:'Manuale operativo tecnici: collaudo a freddo, parametri nascosti.',url:'#',rev:'v2.0',date:'2025-08-20',visible:true},
-    {id:'c3',title:'Manuale Utente Slim',type:'documento',level:'product',entity:'p1',excl:[],desc:'Manuale installazione, uso e manutenzione Slim.',url:'#',rev:'v2.3',date:'2025-11-05',visible:true},
-    {id:'c4',title:'Guida WiFi LX64',type:'wifi',level:'electronic',entity:'e2',excl:['p10'],desc:'Configurazione WiFi LX64WR (escluso Pellet-Blok).',url:'#',rev:'v1.8',date:'2025-09-01',visible:true},
-    {id:'c5',title:'Ricambi Aris Plus',type:'ricambi',level:'product',entity:'p5',excl:[],desc:'Catalogo ricambi con codici e schemi esplosi.',url:'#',rev:'v1.0',date:'2025-06-15',visible:true},
-    {id:'c6',title:'Circolare Tecnica Stufe Pellet 2025',type:'circolare',level:'family',entity:'f1',excl:[],desc:'Circolare tecnica valida per tutta la gamma stufe a pellet.',url:'#',rev:'v1.0',date:'2025-12-01',visible:true},
-    {id:'c7',title:'Video Pulizia Kikka Plus',type:'video',level:'product',entity:'p7',excl:[],desc:'Video guida: procedura pulizia crogiolo.',url:'https://youtube.com',rev:'v1',date:'2025-03-10',visible:true},
-    {id:'c8',title:'Circolare WiFi The Mind (no Gora)',type:'circolare',level:'electronic',entity:'e1',excl:['p3'],desc:'Aggiornamento WiFi The Mind. NON applicare a Gora Slim.',url:'#',rev:'v2.1',date:'2026-01-10',visible:true},
-  ],
-  params: [
-    {id:'pa1',code:'AC',name:'Carico Pellet Accensione',desc:'% pellet prima fase accensione',range:'0–100',unit:'%',def:'20',notes:'Aumentare se pellet bassa qualità.',level:'product',entity:'p1',excl:[]},
-    {id:'pa2',code:'AR',name:'Carico Pellet Riscaldamento',desc:'% pellet seconda fase accensione',range:'0–100',unit:'%',def:'35',notes:'',level:'product',entity:'p1',excl:[]},
-    {id:'pa3',code:'P1',name:'Carico Pellet P1',desc:'Carico pellet potenza minima',range:'0–100',unit:'%',def:'40',notes:'',level:'product',entity:'p1',excl:[]},
-    {id:'pa4',code:'P5',name:'Carico Pellet P5',desc:'Carico pellet potenza massima',range:'0–100',unit:'%',def:'80',notes:'',level:'product',entity:'p1',excl:[]},
-    {id:'pa5',code:'T67',name:'Counter Pulizia',desc:'Ore funzionamento prima del messaggio Pulizia',range:'0–999',unit:'h',def:'24',notes:'',level:'product',entity:'p1',excl:[]},
-    {id:'pa6',code:'BT',name:'Unpair Bluetooth',desc:'Azzera associazione BT. Solo a stufa spenta.',range:'ON/OFF',unit:'',def:'OFF',notes:'DA NON ATTIVARE IN FUNZIONE.',level:'electronic',entity:'e1',excl:[]},
-    {id:'pa7',code:'WIFI',name:'Configurazione WiFi',desc:'Attivare 60s poi scansionare con app.',range:'ON/OFF',unit:'',def:'OFF',notes:'',level:'electronic',entity:'e1',excl:[]},
-    {id:'pa8',code:'AK',name:'Airkare',desc:'Abilita funzione Airkare qualità aria.',range:'ON/OFF',unit:'',def:'OFF',notes:'',level:'electronic',entity:'e1',excl:[]},
-    {id:'pa9',code:'H2O',name:'Temp. Max Acqua',desc:'T° acqua oltre la quale va in Over temp H2O.',range:'60–90',unit:'°C',def:'78',notes:'',level:'product',entity:'p8',excl:[]},
-    {id:'pa10',code:'P10',name:'Carico Pellet P10',desc:'Carico pellet potenza massima 10 livelli',range:'0–100',unit:'%',def:'85',notes:'',level:'product',entity:'p8',excl:[]},
-    {id:'pa11',code:'MANU',name:'Counter Manutenzione',desc:'Kg pellet per avviso Manutenzione CAT',range:'0–9999',unit:'Kg',def:'1500',notes:'',level:'family',entity:'f1',excl:[]},
-  ],
-  alarms: [
-    {id:'al1',code:'H1',title:'No Depression',desc:'Sensore flusso sotto la soglia.',cause:'Tiraggio insufficiente, estrattore guasto.',solution:'Verificare canna fumaria. Controllare estrattore.',notes:'Disabilitare temp. con tasto Meno.',priority:'Alta',level:'family',entity:'f1',excl:[]},
-    {id:'al2',code:'H2',title:'No Start / Start Failed',desc:'Fiamma non rilevata entro il tempo max.',cause:'Pellet assente, candeletta guasta.',solution:'Verificare pellet. Controllare candeletta.',notes:'',priority:'Alta',level:'family',entity:'f1',excl:[]},
-    {id:'al3',code:'H7',title:'Over Temp Fumi',desc:'Temperatura fumi supera la soglia.',cause:'Canna ostruita, potenza alta.',solution:'Pulire stufa e canna. Abbassare potenza.',notes:'Soglia default 280°C.',priority:'Alta',level:'family',entity:'f1',excl:[]},
-    {id:'al4',code:'H5',title:'Blackout',desc:'Interruzione alimentazione durante funzionamento.',cause:'Mancanza corrente.',solution:'Normale. Riaccensione auto se BLACKOUT=ON.',notes:'',priority:'Bassa',level:'family',entity:'f1',excl:[]},
-    {id:'al5',code:'H8',title:'Over Temp H2O',desc:'Temperatura acqua superiore al parametro.',cause:'Circolatore guasto, pressione bassa.',solution:'Verificare circolatore e impianto idraulico.',notes:'Solo termostufe idro.',priority:'Alta',level:'family',entity:'f2',excl:[]},
-    {id:'al6',code:'AL11',title:'Stop Fiamma',desc:'T° fumi scesa sotto la soglia minima.',cause:'Pellet bassa qualità, crogiolo sporco.',solution:'Verificare qualità pellet. Pulire crogiolo.',notes:'',priority:'Media',level:'electronic',entity:'e3',excl:[]},
-  ],
-  firmware: [
-    {id:'fw1',name:'THE MIND SERVICE',version:'USB MAX 8GB',date:'2026-01-15',notes:'Fix AIRKARE, miglioramento BLE, parametri autoregolazione.',level:'electronic',entity:'e1',excl:[]},
-    {id:'fw2',name:'SLIM WiFi LAN1',version:'LX64WR_12_1_108',date:'2025-01-04',notes:'Miglioramento stabilità WiFi e parametri via APP.',level:'product',entity:'p1',excl:[]},
-    {id:'fw3',name:'MAXIMA 24',version:'V2.4',date:'2025-10-12',notes:'Gestione allarme portello. Nuovo parametro anti-legionella.',level:'product',entity:'p8',excl:[]},
-  ],
-  serials: [
-    {id:'s1',pattern:'ASL05AIR',prod:'p1',pri:1},{id:'s2',pattern:'ASL',prod:'p1',pri:2},
-    {id:'s3',pattern:'AGORA2',prod:'p4',pri:1},{id:'s4',pattern:'AGORA',prod:'p3',pri:2},
-    {id:'s5',pattern:'AIRIS',prod:'p2',pri:1},{id:'s6',pattern:'AARIS',prod:'p5',pri:1},
-    {id:'s7',pattern:'AARPL',prod:'p5',pri:1},{id:'s8',pattern:'APKAMIN',prod:'p6',pri:1},
-    {id:'s9',pattern:'AKIKKA',prod:'p7',pri:1},{id:'s10',pattern:'AMAXIMA',prod:'p8',pri:1},
-    {id:'s11',pattern:'ANARA',prod:'p9',pri:1},{id:'s12',pattern:'SLIM',prod:'p1',pri:10},
-  ],
 };
 
+// ── Carica tutti i dati da Supabase ──
+async function loadAllData() {
+  showLoader(true);
+  try {
+    const [elec, fam, apps, prods, ser, cont, par, al, fw] = await Promise.all([
+      supa.from('electronics').select('*').order('name'),
+      supa.from('families').select('*').order('name'),
+      supa.from('apps').select('*').order('name'),
+      supa.from('products').select('*').order('name'),
+      supa.from('serial_rules').select('*').order('priority'),
+      supa.from('contents').select('*').eq('visible', true).order('title'),
+      supa.from('params').select('*').order('code'),
+      supa.from('alarms').select('*').order('code'),
+      supa.from('firmware').select('*').order('name'),
+    ]);
+    // Map Supabase column names → app field names
+    DB.electronics = (elec.data||[]).map(r=>({id:r.id, name:r.name, icon:r.icon||'🖥', desc:r.description||''}));
+    DB.families    = (fam.data||[]).map(r=>({id:r.id, name:r.name}));
+    DB.apps        = (apps.data||[]).map(r=>({id:r.id, name:r.name}));
+    DB.products    = (prods.data||[]).map(r=>({
+      id:r.id, name:r.name, emoji:r.emoji||'🔥',
+      codes: r.codes||[r.name],
+      type: r.product_type||'',
+      elec: r.elec_id, family: r.family_id, app: r.app_id,
+      active: r.active, desc: r.description||'',
+    }));
+    DB.serials  = (ser.data||[]).map(r=>({id:r.id, pattern:r.pattern, prod:r.product_id, pri:r.priority}));
+    DB.contents = (cont.data||[]).map(r=>({
+      id:r.id, title:r.title, type:r.content_type,
+      level:r.level, entity:r.entity_id,
+      excl: r.exclusions||[],
+      desc:r.description||'', url:r.file_url||'#',
+      rev:r.revision||'—', date:r.created_at?.split('T')[0]||'', visible:true,
+    }));
+    DB.params = (par.data||[]).map(r=>({
+      id:r.id, code:r.code, name:r.name, desc:r.description||'',
+      range:r.range_val||'', unit:r.unit||'', def:r.default_val||'',
+      notes:r.notes||'', level:r.level, entity:r.entity_id, excl:r.exclusions||[],
+    }));
+    DB.alarms = (al.data||[]).map(r=>({
+      id:r.id, code:r.code, title:r.title, desc:r.description||'',
+      cause:r.cause||'', solution:r.solution||'', notes:r.notes||'',
+      priority:r.priority||'Media', level:r.level, entity:r.entity_id, excl:r.exclusions||[],
+    }));
+    DB.firmware = (fw.data||[]).map(r=>({
+      id:r.id, name:r.name, version:r.version||'',
+      date:r.release_date||'', notes:r.notes||'',
+      level:r.level, entity:r.entity_id, excl:r.exclusions||[],
+    }));
+    console.log('✅ Dati caricati da Supabase:', DB.products.length, 'prodotti');
+  } catch(e) {
+    console.error('❌ Errore caricamento dati:', e);
+    toast('Errore connessione database. Riprova.','err');
+  }
+  showLoader(false);
+}
+
+function showLoader(show) {
+  let el = $('app-loader');
+  if(!el) {
+    el = document.createElement('div');
+    el.id = 'app-loader';
+    el.style.cssText = 'position:fixed;inset:0;background:rgba(26,26,26,.85);z-index:8888;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;';
+    el.innerHTML = '<div style="width:40px;height:40px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite"></div><div style="color:rgba(255,255,255,.7);font:500 14px Barlow,sans-serif">Caricamento dati...</div>';
+    document.body.appendChild(el);
+    const style = document.createElement('style');
+    style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(style);
+  }
+  el.style.display = show ? 'flex' : 'none';
+}
+
+// ── Funzioni CRUD Supabase per Admin ──
+
+async function dbSave(table, data, id) {
+  // Mappa nomi campi app → nomi colonne Supabase
+  const mapped = mapToDb(table, data);
+  let res;
+  if(id) {
+    res = await supa.from(table).update(mapped).eq('id', id).select().single();
+  } else {
+    res = await supa.from(table).insert(mapped).select().single();
+  }
+  if(res.error) throw res.error;
+  return res.data;
+}
+
+async function dbDelete(table, id) {
+  const res = await supa.from(table).delete().eq('id', id);
+  if(res.error) throw res.error;
+}
+
+function mapToDb(table, data) {
+  if(table==='products') return {
+    name:data.name, emoji:data.emoji, codes:data.codes,
+    product_type:data.type, elec_id:data.elec||null,
+    family_id:data.family||null, app_id:data.app||null,
+    active:data.active, description:data.desc,
+  };
+  if(table==='electronics') return {name:data.name, icon:data.icon, description:data.desc};
+  if(table==='families') return {name:data.name};
+  if(table==='contents') return {
+    title:data.title, content_type:data.type, level:data.level,
+    entity_id:data.entity, exclusions:data.excl||[],
+    description:data.desc, file_url:data.url,
+    revision:data.rev, visible:data.visible!==false,
+  };
+  if(table==='params') return {
+    code:data.code, name:data.name, description:data.desc,
+    range_val:data.range, unit:data.unit, default_val:data.def,
+    notes:data.notes, level:data.level,
+    entity_id:data.entity, exclusions:data.excl||[],
+  };
+  if(table==='alarms') return {
+    code:data.code, title:data.title, description:data.desc,
+    cause:data.cause, solution:data.solution, notes:data.notes,
+    priority:data.priority, level:data.level,
+    entity_id:data.entity, exclusions:data.excl||[],
+  };
+  if(table==='firmware') return {
+    name:data.name, version:data.version,
+    release_date:data.date||null, notes:data.notes,
+    level:data.level, entity_id:data.entity, exclusions:data.excl||[],
+  };
+  if(table==='serial_rules') return {
+    pattern:data.pattern, product_id:data.prod, priority:data.pri||5,
+  };
+  return data;
+}
+
 // ══════════════════════════════════════
-// DB HELPERS
+// AUTH — LOGIN / LOGOUT (via Supabase Auth)
 // ══════════════════════════════════════
-const getElec = id => DB.electronics.find(e => e.id === id) || null;
-const getFamily = id => DB.families.find(f => f.id === id) || null;
-const getApp = id => DB.apps.find(a => a.id === id) || null;
-const getProduct = id => DB.products.find(p => p.id === id) || null;
+let curUser = null;
 
-// Inheritance logic with exclusions
-const getContents = p => DB.contents.filter(c => c.visible && (
-  (c.level==='product' && c.entity===p.id) ||
-  (c.level==='electronic' && c.entity===p.elec && !c.excl.includes(p.id)) ||
-  (c.level==='family' && c.entity===p.family && !c.excl.includes(p.id))
-)).sort((a,b) => ({product:0,electronic:1,family:2}[a.level] - {product:0,electronic:1,family:2}[b.level]));
+async function doLogin() {
+  const email = ($('login-user')?.value||'').trim();
+  const pass  = ($('login-pass')?.value||'').trim();
+  const err   = $('login-err');
+  if(!email||!pass) { if(err) err.style.display='block'; return; }
 
-const getParams = p => DB.params.filter(pa => (
-  (pa.level==='product' && pa.entity===p.id) ||
-  (pa.level==='electronic' && pa.entity===p.elec && !pa.excl.includes(p.id)) ||
-  (pa.level==='family' && pa.entity===p.family && !pa.excl.includes(p.id))
-)).sort((a,b) => ({product:0,electronic:1,family:2}[a.level] - {product:0,electronic:1,family:2}[b.level]));
+  showLoader(true);
+  const {data, error} = await supa.auth.signInWithPassword({email, password:pass});
+  showLoader(false);
 
-const getAlarms = p => DB.alarms.filter(al => (
-  (al.level==='product' && al.entity===p.id) ||
-  (al.level==='electronic' && al.entity===p.elec && !al.excl.includes(p.id)) ||
-  (al.level==='family' && al.entity===p.family && !al.excl.includes(p.id))
-)).sort((a,b) => ({product:0,electronic:1,family:2}[a.level] - {product:0,electronic:1,family:2}[b.level]));
+  if(error||!data?.user) {
+    if(err) err.style.display='block';
+    return;
+  }
 
-const getFw = p => DB.firmware.filter(fw => (
-  (fw.level==='product' && fw.entity===p.id) ||
-  (fw.level==='electronic' && fw.entity===p.elec && !(fw.excl||[]).includes(p.id))
-)).sort((a,b) => ({product:0,electronic:1,family:2}[a.level] - {product:0,electronic:1,family:2}[b.level]));
+  // Carica profilo (ruolo)
+  const {data:profile} = await supa.from('user_profiles')
+    .select('full_name,role,active')
+    .eq('id', data.user.id)
+    .single();
 
-const getAffected = (level, entity, excl) => {
-  if(level==='product') return DB.products.filter(p=>p.id===entity&&p.active);
-  if(level==='electronic') return DB.products.filter(p=>p.elec===entity&&p.active&&!excl.includes(p.id));
-  if(level==='family') return DB.products.filter(p=>p.family===entity&&p.active&&!excl.includes(p.id));
-  return [];
-};
+  if(!profile||!profile.active) {
+    await supa.auth.signOut();
+    if(err) { err.textContent='⚠ Account non attivo. Contatta l'amministratore.'; err.style.display='block'; }
+    return;
+  }
+
+  curUser = {id: data.user.id, email: data.user.email, name: profile.full_name||data.user.email, role: profile.role||'cat'};
+
+  $('login-screen').style.display = 'none';
+  const nb = $('nb-admin');
+  if(nb) nb.style.display = curUser.role==='admin' ? 'inline-flex' : 'none';
+  const ui = $('nav-user-info');
+  if(ui) ui.textContent = curUser.name + (curUser.role==='admin' ? ' · Admin' : '');
+
+  await loadAllData();
+  initHome();
+  loadFavs();
+}
+
+async function doLogout() {
+  await supa.auth.signOut();
+  curUser = null;
+  $('login-screen').style.display = 'flex';
+  $('login-user').value = '';
+  $('login-pass').value = '';
+  const err = $('login-err');
+  if(err) { err.style.display='none'; err.textContent='⚠ Credenziali non valide.'; }
+}
+
+function isAdmin() { return curUser?.role === 'admin'; }
+function requireAdmin() {
+  if(!isAdmin()) { toast('Accesso riservato agli amministratori','err'); return false; }
+  return true;
+}
+
+// ── Controlla sessione esistente all'avvio ──
+async function checkSession() {
+  const {data:{session}} = await supa.auth.getSession();
+  if(session?.user) {
+    const {data:profile} = await supa.from('user_profiles')
+      .select('full_name,role,active').eq('id',session.user.id).single();
+    if(profile?.active) {
+      curUser = {id:session.user.id, email:session.user.email, name:profile.full_name||session.user.email, role:profile.role||'cat'};
+      $('login-screen').style.display='none';
+      const nb=$('nb-admin'); if(nb) nb.style.display=curUser.role==='admin'?'inline-flex':'none';
+      const ui=$('nav-user-info'); if(ui) ui.textContent=curUser.name+(curUser.role==='admin'?' · Admin':'');
+      await loadAllData();
+      initHome();
+      loadFavs();
+      return;
+    }
+  }
+  // Nessuna sessione → mostra login
+  $('login-screen').style.display='flex';
+}
+
+// ══════════════════════════════════════
+// FAVOURITES
+// ══════════════════════════════════════
+let FAVS = new Set();
+
+function loadFavs() {
+  try { FAVS = new Set(JSON.parse(localStorage.getItem('ek_favs')||'[]')); } catch(e) { FAVS = new Set(); }
+  renderFavs();
+}
+function saveFavs() {
+  try { localStorage.setItem('ek_favs', JSON.stringify([...FAVS])); } catch(e) {}
+}
+function toggleFav(id) {
+  if(FAVS.has(id)) FAVS.delete(id); else FAVS.add(id);
+  saveFavs();
+  renderFavs();
+  // Refresh fav button on product page if visible
+  const btn = $('fav-btn-'+id);
+  if(btn) btn.textContent = FAVS.has(id) ? '⭐ Preferito' : '☆ Aggiungi ai preferiti';
+  // Refresh star in products table if visible
+  renderProdsTable();
+  toast(FAVS.has(id) ? '⭐ Aggiunto ai preferiti' : '☆ Rimosso dai preferiti');
+}
+function renderFavs() {
+  const grid = $('favs-grid');
+  const empty = $('favs-empty');
+  if(!grid) return;
+  const favProds = DB.products.filter(p => FAVS.has(p.id) && p.active);
+  if(!favProds.length) {
+    grid.innerHTML = '';
+    if(empty) empty.style.display = 'block';
+    return;
+  }
+  if(empty) empty.style.display = 'none';
+  grid.innerHTML = favProds.map(p => `
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px 14px;cursor:pointer;transition:all .2s;text-align:center;position:relative;"
+      onmouseover="this.style.boxShadow='var(--sh)';this.style.borderColor='rgba(212,65,10,.3)'"
+      onmouseout="this.style.boxShadow='';this.style.borderColor='var(--border)'"
+      onclick="openProduct('${p.id}')">
+      <button onclick="event.stopPropagation();toggleFav('${p.id}')" style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;opacity:.6;" title="Rimuovi">⭐</button>
+      <div style="font-size:32px;margin-bottom:8px">${p.emoji}</div>
+      <div style="font:700 14px 'Barlow Condensed',sans-serif;color:var(--ink);margin-bottom:3px">${p.name}</div>
+      <div style="font-size:10px;color:var(--ink3)">${getElec(p.elec)?.name||''}</div>
+      <div style="margin-top:8px"><span class="badge bb" style="font-size:9px">${getFamily(p.family)?.name||'—'}</span></div>
+    </div>`).join('');
+}
+
+// Patch admin-only actions to check role
+const _origOpenProductModal = openProductModal;
+function openProductModal(id) { if(!requireAdmin()) return; _origOpenProductModal(id); }
+const _origOpenAlarmModal = openAlarmModal;
+function openAlarmModal(id) { if(!requireAdmin()) return; _origOpenAlarmModal(id); }
+const _origOpenParamModal = openParamModal;
+function openParamModal(id) { if(!requireAdmin()) return; _origOpenParamModal(id); }
+const _origOpenFwModal = openFwModal;
+function openFwModal(id) { if(!requireAdmin()) return; _origOpenFwModal(id); }
+const _origOpenElecModal = openElecModal;
+function openElecModal(id) { if(!requireAdmin()) return; _origOpenElecModal(id); }
+const _origOpenContentWizard = openContentWizard;
+function openContentWizard() { if(!requireAdmin()) return; _origOpenContentWizard(); }
+const _origOpenXlsImport = openXlsImport;
+function openXlsImport(type) { if(!requireAdmin()) return; _origOpenXlsImport(type); }
+const _origOpenDupModal = openDupModal;
+function openDupModal(kind) { if(!requireAdmin()) return; _origOpenDupModal(kind); }
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
 
 // ══════════════════════════════════════
 // ROUTING
@@ -1123,7 +1311,12 @@ function renderAProd() {
         <button class="alink" style="color:var(--ink3)" onclick="toggleProd('${p.id}')">${p.active?'Disattiva':'Attiva'}</button></td>
   </tr>`).join('')}</tbody></table></div>`;
 }
-function toggleProd(id){const p=getProduct(id);if(p){p.active=!p.active;renderAProd();initHome();toast(p.name+' '+(p.active?'attivato':'disattivato'),'ok');}}
+async function toggleProd(id){
+  if(!requireAdmin()) return;
+  const p=getProduct(id); if(!p) return;
+  try { showLoader(true); await dbSave('products',{...p,active:!p.active},id); await loadAllData(); renderAProd(); initHome(); toast(p.name+' '+(p.active?'disattivato':'attivato'),'ok'); }
+  catch(e){ toast('Errore: '+e.message,'err'); } finally{ showLoader(false); }
+}
 
 // ── ADMIN ELEC ──
 function renderAElec(){
@@ -1204,13 +1397,20 @@ function openProductModal(id) {
     `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveProduct('${id||''}')">✓ Salva</button>`
   );
 }
-function saveProduct(id) {
+async function saveProduct(id) {
+  if(!requireAdmin()) return;
   const name=getVal('pm-name'); if(!name){toast('Nome obbligatorio','err');return;}
   const serial=getVal('pm-serial');
-  const data={name,emoji:getVal('pm-emoji')||'🔥',codes:getVal('pm-codes').split(',').map(c=>c.trim()).filter(Boolean)||[name],type:$('pm-type').value,elec:$('pm-elec').value,family:$('pm-fam').value,app:$('pm-app').value,active:$('pm-active').value==='1',desc:getVal('pm-desc')};
-  if(id) { const p=getProduct(id); if(p) Object.assign(p,data); }
-  else { const nid='p'+uid(); data.id=nid; DB.products.push(data); if(serial) DB.serials.push({id:'s'+uid(),pattern:serial,prod:nid,pri:5}); }
-  closeModal(); renderAllAdmin(); initHome(); toast('✓ Prodotto salvato','ok');
+  const data={name,emoji:getVal('pm-emoji')||'🔥',codes:getVal('pm-codes').split(',').map(c=>c.trim()).filter(Boolean),type:$('pm-type').value,elec:$('pm-elec').value||null,family:$('pm-fam').value||null,app:$('pm-app').value||null,active:$('pm-active').value==='1',desc:getVal('pm-desc')};
+  try {
+    showLoader(true);
+    const saved = await dbSave('products', data, id||null);
+    if(serial) {
+      const existing=DB.serials.find(r=>r.prod===(id||saved.id));
+      await dbSave('serial_rules',{pattern:serial,prod:saved.id,pri:5},existing?.id||null);
+    }
+    await loadAllData(); closeModal(); renderAllAdmin(); initHome(); toast('✓ Prodotto salvato','ok');
+  } catch(e){ toast('Errore: '+e.message,'err'); } finally{ showLoader(false); }
 }
 
 // ══════════════════════════════════════
@@ -1227,12 +1427,12 @@ function openElecModal(id) {
     `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveElec('${id||''}')">✓ Salva</button>`,'sm'
   );
 }
-function saveElec(id) {
+async function saveElec(id) {
+  if(!requireAdmin()) return;
   const name=getVal('em-name'); if(!name){toast('Nome obbligatorio','err');return;}
   const data={name,icon:getVal('em-icon')||'🖥',desc:getVal('em-desc')};
-  if(id){const e=getElec(id);if(e)Object.assign(e,data);}
-  else DB.electronics.push({id:'e'+uid(),...data});
-  closeModal(); renderAllAdmin(); initHome(); toast('✓ Salvato','ok');
+  try { showLoader(true); await dbSave('electronics',data,id||null); await loadAllData(); closeModal(); renderAllAdmin(); initHome(); toast('✓ Salvato','ok'); }
+  catch(e){ toast('Errore: '+e.message,'err'); } finally{ showLoader(false); }
 }
 
 // ══════════════════════════════════════
@@ -1293,13 +1493,13 @@ function updateEntitySel(pfx) {
   else if(lev==='electronic') sel.innerHTML=DB.electronics.map(e=>`<option value="${e.id}">${e.icon} ${e.name}</option>`).join('');
   else sel.innerHTML=DB.families.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
 }
-function saveAlarm(id){
+async function saveAlarm(id){
+  if(!requireAdmin()) return;
   const code=getVal('alm-code'),title=getVal('alm-title');
   if(!code||!title){toast('Codice e titolo obbligatori','err');return;}
   const data={code,title,desc:getVal('alm-desc'),cause:getVal('alm-cause'),solution:getVal('alm-sol'),notes:getVal('alm-notes'),priority:$('alm-pri').value,level:$('alm-level').value,entity:$('alm-entity').value,excl:[]};
-  if(id){const al=DB.alarms.find(a=>a.id===id);if(al)Object.assign(al,data);}
-  else DB.alarms.push({id:'al'+uid(),...data});
-  closeModal(); renderAAlarms(); toast('✓ Allarme salvato','ok');
+  try { showLoader(true); await dbSave('alarms',data,id||null); await loadAllData(); closeModal(); renderAAlarms(); toast('✓ Allarme salvato','ok'); }
+  catch(e){ toast('Errore: '+e.message,'err'); } finally{ showLoader(false); }
 }
 
 // ══════════════════════════════════════
@@ -1330,13 +1530,13 @@ function openParamModal(id) {
     `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveParam('${id||''}')">✓ Salva</button>`,'lg');
   if(pa){$('prm-level').value=pa.level;updateEntitySel('prm');$('prm-entity').value=pa.entity;}
 }
-function saveParam(id){
+async function saveParam(id){
+  if(!requireAdmin()) return;
   const code=getVal('prm-code'),name=getVal('prm-name');
   if(!code||!name){toast('Codice e nome obbligatori','err');return;}
   const data={code,name,desc:getVal('prm-desc'),range:getVal('prm-range'),unit:getVal('prm-unit'),def:getVal('prm-def'),notes:getVal('prm-notes'),level:$('prm-level').value,entity:$('prm-entity').value,excl:[]};
-  if(id){const pa=DB.params.find(p=>p.id===id);if(pa)Object.assign(pa,data);}
-  else DB.params.push({id:'pa'+uid(),...data});
-  closeModal(); renderAParams(); toast('✓ Parametro salvato','ok');
+  try { showLoader(true); await dbSave('params',data,id||null); await loadAllData(); closeModal(); renderAParams(); toast('✓ Parametro salvato','ok'); }
+  catch(e){ toast('Errore: '+e.message,'err'); } finally{ showLoader(false); }
 }
 
 // ══════════════════════════════════════
@@ -1357,12 +1557,12 @@ function openFwModal(id) {
     `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveFw('${id||''}')">✓ Salva</button>`);
   if(fw){$('fw-level').value=fw.level;updateEntitySel('fw');$('fw-entity').value=fw.entity;}
 }
-function saveFw(id){
+async function saveFw(id){
+  if(!requireAdmin()) return;
   const name=getVal('fw-name');if(!name){toast('Nome obbligatorio','err');return;}
   const data={name,version:getVal('fw-ver'),date:getVal('fw-date')||today(),notes:getVal('fw-notes'),level:$('fw-level').value,entity:$('fw-entity').value,excl:[]};
-  if(id){const fw=DB.firmware.find(f=>f.id===id);if(fw)Object.assign(fw,data);}
-  else DB.firmware.push({id:'fw'+uid(),...data});
-  closeModal(); renderAFw(); toast('✓ Firmware salvato','ok');
+  try { showLoader(true); await dbSave('firmware',data,id||null); await loadAllData(); closeModal(); renderAFw(); toast('✓ Firmware salvato','ok'); }
+  catch(e){ toast('Errore: '+e.message,'err'); } finally{ showLoader(false); }
 }
 
 // ══════════════════════════════════════
@@ -1441,15 +1641,21 @@ function wizNav(dir) {
   WIZ.step=Math.max(1,Math.min(6,next));
   renderWizard();
 }
-function saveContent() {
+async function saveContent() {
+  if(!requireAdmin()) return;
   if(!WIZ.title){toast('Inserisci un titolo','err');return;}
-  if(WIZ.assoc==='product') {
-    WIZ.selProds.forEach(pid=>DB.contents.push({id:'c'+uid(),title:WIZ.title,type:WIZ.type,level:'product',entity:pid,excl:[],desc:WIZ.desc,url:WIZ.url||'#',rev:WIZ.rev||'v1.0',date:today(),visible:true}));
-  } else {
-    const level=WIZ.assoc==='electronic_excl'?'electronic':WIZ.assoc;
-    DB.contents.push({id:'c'+uid(),title:WIZ.title,type:WIZ.type,level,entity:WIZ.entity,excl:WIZ.excl,desc:WIZ.desc,url:WIZ.url||'#',rev:WIZ.rev||'v1.0',date:today(),visible:true});
-  }
-  closeModal(); renderACont(); initHome(); toast('✓ Contenuto salvato','ok');
+  try {
+    showLoader(true);
+    if(WIZ.assoc==='product') {
+      for(const pid of WIZ.selProds) {
+        await dbSave('contents',{title:WIZ.title,type:WIZ.type,level:'product',entity:pid,excl:[],desc:WIZ.desc,url:WIZ.url||'#',rev:WIZ.rev||'v1.0',visible:true},null);
+      }
+    } else {
+      const level=WIZ.assoc==='electronic_excl'?'electronic':WIZ.assoc;
+      await dbSave('contents',{title:WIZ.title,type:WIZ.type,level,entity:WIZ.entity,excl:WIZ.excl,desc:WIZ.desc,url:WIZ.url||'#',rev:WIZ.rev||'v1.0',visible:true},null);
+    }
+    await loadAllData(); closeModal(); renderACont(); initHome(); toast('✓ Contenuto salvato','ok');
+  } catch(e){ toast('Errore: '+e.message,'err'); } finally{ showLoader(false); }
 }
 
 // ══════════════════════════════════════
@@ -1721,11 +1927,10 @@ function openXlsImport(type) { if(!requireAdmin()) return; _origOpenXlsImport(ty
 const _origOpenDupModal = openDupModal;
 function openDupModal(kind) { if(!requireAdmin()) return; _origOpenDupModal(kind); }
 
-// ══════════════════════════════════════
-// INIT
-// ══════════════════════════════════════
-// Non chiamare initHome() subito — aspetta il login
-// initHome() verrà chiamato da doLogin()
+
+
+// Avvio: controlla se c'è già una sessione attiva
+checkSession();
 </script>
 </body>
 </html>
