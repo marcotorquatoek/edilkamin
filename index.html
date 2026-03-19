@@ -409,7 +409,7 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
       <div class="nav-logo-icon">EK</div>
       <div>
         <div class="nav-logo-name">EDILKAMIN</div>
-        <span class="nav-logo-sub">Portale Tecnico <!-- VERSIONE --> v5.0.0</span>
+        <span class="nav-logo-sub">Portale Tecnico <!-- VERSIONE --> v6.0.0</span>
       </div>
     </div>
     <div class="nav-right">
@@ -612,9 +612,14 @@ const getVal = id => { const el = $(id); return el ? el.value.trim() : ''; };
 // ↓↓↓ INCOLLA QUI LE TUE CHIAVI SUPABASE ↓↓↓
 const SUPA_URL = 'https://mddqusydtejvapwaftzf.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1kZHF1c3lkdGVqdmFwd2FmdHpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM5MTUyNTcsImV4cCI6MjA4OTQ5MTI1N30.W0hg0gnNprjihzYiC9XpEtIjjxeDO6k3IxAgM0ha__0';
-// ↑↑↑ ─────────────────────────────── ↑↑↑
 
-const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+let supa;
+try {
+  supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+  console.log('✅ Supabase inizializzato');
+} catch(e) {
+  console.error('❌ Errore init Supabase:', e);
+}
 
 // ── DB in memoria (popolato da Supabase all'avvio) ──
 const DB = {
@@ -760,44 +765,82 @@ function mapToDb(table, data) {
 let curUser = null;
 
 async function doLogin() {
-  const email = ($('login-user')?.value||'').trim();
-  const pass  = ($('login-pass')?.value||'').trim();
-  const err   = $('login-err');
-  if(!email||!pass) { if(err) err.style.display='block'; return; }
+  const emailEl = $('login-user');
+  const passEl  = $('login-pass');
+  const errEl   = $('login-err');
+  const email   = (emailEl?.value||'').trim();
+  const pass    = (passEl?.value||'').trim();
+
+  // Reset error
+  if(errEl) { errEl.style.display='none'; errEl.textContent='⚠ Credenziali non valide.'; }
+
+  if(!email||!pass) {
+    if(errEl) { errEl.textContent='⚠ Inserisci email e password.'; errEl.style.display='block'; }
+    return;
+  }
+
+  if(!supa) {
+    if(errEl) { errEl.textContent='⚠ Errore connessione database. Ricarica la pagina.'; errEl.style.display='block'; }
+    return;
+  }
 
   showLoader(true);
-  const {data, error} = await supa.auth.signInWithPassword({email, password:pass});
-  showLoader(false);
+  try {
+    const {data, error} = await supa.auth.signInWithPassword({email, password:pass});
 
-  if(error||!data?.user) {
-    if(err) err.style.display='block';
-    return;
+    if(error) {
+      console.error('Login error:', error.message);
+      if(errEl) {
+        if(error.message.includes('Invalid')) errEl.textContent='⚠ Email o password non corretti.';
+        else if(error.message.includes('Email not confirmed')) errEl.textContent='⚠ Conferma prima la tua email (controlla la posta).';
+        else errEl.textContent='⚠ Errore: '+error.message;
+        errEl.style.display='block';
+      }
+      return;
+    }
+
+    if(!data?.user) {
+      if(errEl) { errEl.textContent='⚠ Login fallito. Riprova.'; errEl.style.display='block'; }
+      return;
+    }
+
+    // Carica profilo utente
+    const {data:profile, error:profErr} = await supa.from('user_profiles')
+      .select('full_name,role,active')
+      .eq('id', data.user.id)
+      .single();
+
+    if(profErr || !profile) {
+      // Profilo non trovato — accesso come CAT di default
+      console.warn('Profilo non trovato, accesso come CAT');
+      curUser = {id:data.user.id, email:data.user.email, name:data.user.email, role:'cat'};
+    } else if(!profile.active) {
+      await supa.auth.signOut();
+      if(errEl) { errEl.textContent='⚠ Account non attivo. Contatta l\'amministratore.'; errEl.style.display='block'; }
+      return;
+    } else {
+      curUser = {id:data.user.id, email:data.user.email, name:profile.full_name||data.user.email, role:profile.role||'cat'};
+    }
+
+    // Login riuscito
+    $('login-screen').style.display = 'none';
+    const nb = $('nb-admin');
+    if(nb) nb.style.display = curUser.role==='admin' ? 'inline-flex' : 'none';
+    const ui = $('nav-user-info');
+    if(ui) ui.textContent = curUser.name + (curUser.role==='admin' ? ' · Admin' : '');
+
+    await loadAllData();
+    initHome();
+    loadFavs();
+
+  } catch(e) {
+    console.error('Errore doLogin:', e);
+    if(errEl) { errEl.textContent='⚠ Errore di connessione: '+e.message; errEl.style.display='block'; }
+  } finally {
+    showLoader(false);
   }
-
-  // Carica profilo (ruolo)
-  const {data:profile} = await supa.from('user_profiles')
-    .select('full_name,role,active')
-    .eq('id', data.user.id)
-    .single();
-
-  if(!profile||!profile.active) {
-    await supa.auth.signOut();
-    if(err) { err.textContent='⚠ Account non attivo. Contatta l'amministratore.'; err.style.display='block'; }
-    return;
-  }
-
-  curUser = {id: data.user.id, email: data.user.email, name: profile.full_name||data.user.email, role: profile.role||'cat'};
-
-  $('login-screen').style.display = 'none';
-  const nb = $('nb-admin');
-  if(nb) nb.style.display = curUser.role==='admin' ? 'inline-flex' : 'none';
-  const ui = $('nav-user-info');
-  if(ui) ui.textContent = curUser.name + (curUser.role==='admin' ? ' · Admin' : '');
-
-  await loadAllData();
-  initHome();
-  loadFavs();
 }
+
 
 async function doLogout() {
   await supa.auth.signOut();
@@ -817,22 +860,25 @@ function requireAdmin() {
 
 // ── Controlla sessione esistente all'avvio ──
 async function checkSession() {
-  const {data:{session}} = await supa.auth.getSession();
-  if(session?.user) {
-    const {data:profile} = await supa.from('user_profiles')
-      .select('full_name,role,active').eq('id',session.user.id).single();
-    if(profile?.active) {
-      curUser = {id:session.user.id, email:session.user.email, name:profile.full_name||session.user.email, role:profile.role||'cat'};
-      $('login-screen').style.display='none';
-      const nb=$('nb-admin'); if(nb) nb.style.display=curUser.role==='admin'?'inline-flex':'none';
-      const ui=$('nav-user-info'); if(ui) ui.textContent=curUser.name+(curUser.role==='admin'?' · Admin':'');
-      await loadAllData();
-      initHome();
-      loadFavs();
-      return;
+  try {
+    if(!supa) { $('login-screen').style.display='flex'; return; }
+    const {data:{session}} = await supa.auth.getSession();
+    if(session?.user) {
+      const {data:profile} = await supa.from('user_profiles')
+        .select('full_name,role,active').eq('id',session.user.id).single();
+      const active = !profile || profile.active !== false;
+      if(active) {
+        curUser = {id:session.user.id, email:session.user.email, name:(profile?.full_name||session.user.email), role:(profile?.role||'cat')};
+        $('login-screen').style.display='none';
+        const nb=$('nb-admin'); if(nb) nb.style.display=curUser.role==='admin'?'inline-flex':'none';
+        const ui=$('nav-user-info'); if(ui) ui.textContent=curUser.name+(curUser.role==='admin'?' · Admin':'');
+        await loadAllData();
+        initHome();
+        loadFavs();
+        return;
+      }
     }
-  }
-  // Nessuna sessione → mostra login
+  } catch(e) { console.error('checkSession error:', e); }
   $('login-screen').style.display='flex';
 }
 
@@ -883,23 +929,7 @@ function renderFavs() {
     </div>`).join('');
 }
 
-// Patch admin-only actions to check role
-const _origOpenProductModal = openProductModal;
-function openProductModal(id) { if(!requireAdmin()) return; _origOpenProductModal(id); }
-const _origOpenAlarmModal = openAlarmModal;
-function openAlarmModal(id) { if(!requireAdmin()) return; _origOpenAlarmModal(id); }
-const _origOpenParamModal = openParamModal;
-function openParamModal(id) { if(!requireAdmin()) return; _origOpenParamModal(id); }
-const _origOpenFwModal = openFwModal;
-function openFwModal(id) { if(!requireAdmin()) return; _origOpenFwModal(id); }
-const _origOpenElecModal = openElecModal;
-function openElecModal(id) { if(!requireAdmin()) return; _origOpenElecModal(id); }
-const _origOpenContentWizard = openContentWizard;
-function openContentWizard() { if(!requireAdmin()) return; _origOpenContentWizard(); }
-const _origOpenXlsImport = openXlsImport;
-function openXlsImport(type) { if(!requireAdmin()) return; _origOpenXlsImport(type); }
-const _origOpenDupModal = openDupModal;
-function openDupModal(kind) { if(!requireAdmin()) return; _origOpenDupModal(kind); }
+// Admin check integrated in save functions
 
 // ══════════════════════════════════════
 // INIT
@@ -1378,25 +1408,6 @@ function renderASerials(){
 // ══════════════════════════════════════
 // PRODUCT MODAL
 // ══════════════════════════════════════
-function openProductModal(id) {
-  const p = id ? getProduct(id) : null;
-  const existSerial = id ? DB.serials.find(r=>r.prod===id)?.pattern||'' : '';
-  openModal(p?'Modifica Prodotto':'Nuovo Prodotto', `
-    <div class="fg2">
-      <div class="fg"><label class="f-label">Nome *</label><input class="f-in" id="pm-name" value="${p?.name||''}" placeholder="es. Slim"></div>
-      <div class="fg"><label class="f-label">Emoji</label><input class="f-in" id="pm-emoji" value="${p?.emoji||'🔥'}"></div>
-      <div class="fg" style="grid-column:span 2"><label class="f-label">Codici (separati da virgola)</label><input class="f-in" id="pm-codes" value="${p?.codes?.join(', ')||''}" placeholder="ASL05AIR, ASLIM…"></div>
-      <div class="fg"><label class="f-label">Tipo</label><select class="f-sel" id="pm-type">${DB.productTypes.map(t=>`<option ${p?.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
-      <div class="fg"><label class="f-label">Elettronica</label><select class="f-sel" id="pm-elec"><option value="">— Nessuna —</option>${DB.electronics.map(e=>`<option value="${e.id}" ${p?.elec===e.id?'selected':''}>${e.name}</option>`).join('')}</select></div>
-      <div class="fg"><label class="f-label">Famiglia</label><select class="f-sel" id="pm-fam"><option value="">— Nessuna —</option>${DB.families.map(f=>`<option value="${f.id}" ${p?.family===f.id?'selected':''}>${f.name}</option>`).join('')}</select></div>
-      <div class="fg"><label class="f-label">App</label><select class="f-sel" id="pm-app"><option value="">— Nessuna —</option>${DB.apps.map(a=>`<option value="${a.id}" ${p?.app===a.id?'selected':''}>${a.name}</option>`).join('')}</select></div>
-      <div class="fg"><label class="f-label">Prefisso matricola</label><input class="f-in" id="pm-serial" value="${existSerial}" placeholder="es. ASL05AIR"></div>
-      <div class="fg"><label class="f-label">Stato</label><select class="f-sel" id="pm-active"><option value="1" ${p?.active!==false?'selected':''}>Attivo</option><option value="0" ${p?.active===false?'selected':''}>Inattivo</option></select></div>
-      <div class="fg" style="grid-column:span 2"><label class="f-label">Descrizione</label><textarea class="f-ta" id="pm-desc">${p?.desc||''}</textarea></div>
-    </div>`,
-    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveProduct('${id||''}')">✓ Salva</button>`
-  );
-}
 async function saveProduct(id) {
   if(!requireAdmin()) return;
   const name=getVal('pm-name'); if(!name){toast('Nome obbligatorio','err');return;}
@@ -1416,17 +1427,6 @@ async function saveProduct(id) {
 // ══════════════════════════════════════
 // ELEC MODAL
 // ══════════════════════════════════════
-function openElecModal(id) {
-  const e = id ? getElec(id) : null;
-  openModal(e?'Modifica Elettronica':'Nuova Elettronica', `
-    <div class="fg2">
-      <div class="fg"><label class="f-label">Nome *</label><input class="f-in" id="em-name" value="${e?.name||''}" placeholder="es. The Mind"></div>
-      <div class="fg"><label class="f-label">Icona</label><input class="f-in" id="em-icon" value="${e?.icon||'🖥'}"></div>
-      <div class="fg" style="grid-column:span 2"><label class="f-label">Descrizione</label><textarea class="f-ta" id="em-desc">${e?.desc||''}</textarea></div>
-    </div>`,
-    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveElec('${id||''}')">✓ Salva</button>`,'sm'
-  );
-}
 async function saveElec(id) {
   if(!requireAdmin()) return;
   const name=getVal('em-name'); if(!name){toast('Nome obbligatorio','err');return;}
@@ -1462,30 +1462,6 @@ function saveSerial(id){const pat=getVal('sr-pattern');if(!pat){toast('Pattern o
 // ══════════════════════════════════════
 // ALARM MODAL
 // ══════════════════════════════════════
-function openAlarmModal(id) {
-  const al=id?DB.alarms.find(a=>a.id===id):null;
-  openModal(al?'Modifica Allarme':'Nuovo Allarme',`
-    <div class="fg2">
-      <div class="fg"><label class="f-label">Codice *</label><input class="f-in" id="alm-code" value="${al?.code||''}" placeholder="H1"></div>
-      <div class="fg"><label class="f-label">Priorità</label><select class="f-sel" id="alm-pri">${['Alta','Media','Bassa'].map(p=>`<option ${al?.priority===p?'selected':''}>${p}</option>`).join('')}</select></div>
-      <div class="fg" style="grid-column:span 2"><label class="f-label">Titolo *</label><input class="f-in" id="alm-title" value="${al?.title||''}" placeholder="Titolo allarme"></div>
-      <div class="fg" style="grid-column:span 2"><label class="f-label">Descrizione</label><textarea class="f-ta" id="alm-desc">${al?.desc||''}</textarea></div>
-      <div class="fg" style="grid-column:span 2"><label class="f-label">Causa</label><textarea class="f-ta" id="alm-cause">${al?.cause||''}</textarea></div>
-      <div class="fg" style="grid-column:span 2"><label class="f-label">Soluzione</label><textarea class="f-ta" id="alm-sol">${al?.solution||''}</textarea></div>
-      <div class="fg" style="grid-column:span 2"><label class="f-label">Note tecniche</label><textarea class="f-ta" id="alm-notes">${al?.notes||''}</textarea></div>
-    </div>
-    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
-      <p style="font:600 10px 'Barlow',sans-serif;color:var(--ink2);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px">Associazione</p>
-      <div class="fg2">
-        <div class="fg"><label class="f-label">Livello</label><select class="f-sel" id="alm-level" onchange="updateEntitySel('alm')">
-          <option value="product">Prodotto</option><option value="electronic">Elettronica</option><option value="family">Famiglia</option>
-        </select></div>
-        <div class="fg"><label class="f-label">Entità</label><select class="f-sel" id="alm-entity">${DB.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
-      </div>
-    </div>`,
-    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveAlarm('${id||''}')">✓ Salva</button>`,'lg');
-  if(al){$('alm-level').value=al.level;updateEntitySel('alm');$('alm-entity').value=al.entity;}
-}
 function updateEntitySel(pfx) {
   const lev=$(`${pfx}-level`)?.value;
   const sel=$(`${pfx}-entity`); if(!sel) return;
@@ -1505,31 +1481,6 @@ async function saveAlarm(id){
 // ══════════════════════════════════════
 // PARAM MODAL
 // ══════════════════════════════════════
-function openParamModal(id) {
-  const pa=id?DB.params.find(p=>p.id===id):null;
-  openModal(pa?'Modifica Parametro':'Nuovo Parametro',`
-    <div class="fg2">
-      <div class="fg"><label class="f-label">Codice *</label><input class="f-in" id="prm-code" value="${pa?.code||''}" placeholder="P1"></div>
-      <div class="fg"><label class="f-label">Nome *</label><input class="f-in" id="prm-name" value="${pa?.name||''}" placeholder="Nome parametro"></div>
-      <div class="fg"><label class="f-label">Range</label><input class="f-in" id="prm-range" value="${pa?.range||''}" placeholder="0–100"></div>
-      <div class="fg"><label class="f-label">Unità misura</label><input class="f-in" id="prm-unit" value="${pa?.unit||''}" placeholder="%"></div>
-      <div class="fg"><label class="f-label">Valore default</label><input class="f-in" id="prm-def" value="${pa?.def||''}" placeholder="50"></div>
-      <div class="fg"></div>
-      <div class="fg" style="grid-column:span 2"><label class="f-label">Descrizione</label><textarea class="f-ta" id="prm-desc">${pa?.desc||''}</textarea></div>
-      <div class="fg" style="grid-column:span 2"><label class="f-label">Note tecniche</label><textarea class="f-ta" id="prm-notes">${pa?.notes||''}</textarea></div>
-    </div>
-    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
-      <p style="font:600 10px 'Barlow',sans-serif;color:var(--ink2);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px">Associazione</p>
-      <div class="fg2">
-        <div class="fg"><label class="f-label">Livello</label><select class="f-sel" id="prm-level" onchange="updateEntitySel('prm')">
-          <option value="product">Prodotto</option><option value="electronic">Elettronica</option><option value="family">Famiglia</option>
-        </select></div>
-        <div class="fg"><label class="f-label">Entità</label><select class="f-sel" id="prm-entity">${DB.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
-      </div>
-    </div>`,
-    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveParam('${id||''}')">✓ Salva</button>`,'lg');
-  if(pa){$('prm-level').value=pa.level;updateEntitySel('prm');$('prm-entity').value=pa.entity;}
-}
 async function saveParam(id){
   if(!requireAdmin()) return;
   const code=getVal('prm-code'),name=getVal('prm-name');
@@ -1542,21 +1493,6 @@ async function saveParam(id){
 // ══════════════════════════════════════
 // FIRMWARE MODAL
 // ══════════════════════════════════════
-function openFwModal(id) {
-  const fw=id?DB.firmware.find(f=>f.id===id):null;
-  openModal(fw?'Modifica Firmware':'Nuovo Firmware',`
-    <div class="fg2">
-      <div class="fg"><label class="f-label">Nome *</label><input class="f-in" id="fw-name" value="${fw?.name||''}" placeholder="es. Slim WiFi"></div>
-      <div class="fg"><label class="f-label">Versione</label><input class="f-in" id="fw-ver" value="${fw?.version||''}" placeholder="v1.0"></div>
-      <div class="fg"><label class="f-label">Livello</label><select class="f-sel" id="fw-level" onchange="updateEntitySel('fw')"><option value="product" ${fw?.level==='product'?'selected':''}>Prodotto</option><option value="electronic" ${fw?.level==='electronic'?'selected':''}>Elettronica</option></select></div>
-      <div class="fg"><label class="f-label">Entità</label><select class="f-sel" id="fw-entity">${DB.products.map(p=>`<option value="${p.id}" ${fw?.entity===p.id?'selected':''}>${p.name}</option>`).join('')}</select></div>
-      <div class="fg"><label class="f-label">Data</label><input class="f-in" id="fw-date" type="date" value="${fw?.date||today()}"></div>
-      <div class="fg"></div>
-      <div class="fg" style="grid-column:span 2"><label class="f-label">Note / Changelog</label><textarea class="f-ta" id="fw-notes">${fw?.notes||''}</textarea></div>
-    </div>`,
-    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveFw('${id||''}')">✓ Salva</button>`);
-  if(fw){$('fw-level').value=fw.level;updateEntitySel('fw');$('fw-entity').value=fw.entity;}
-}
 async function saveFw(id){
   if(!requireAdmin()) return;
   const name=getVal('fw-name');if(!name){toast('Nome obbligatorio','err');return;}
@@ -1570,11 +1506,6 @@ async function saveFw(id){
 // ══════════════════════════════════════
 const WIZ = {step:1,type:'',assoc:'',entity:'',excl:[],selProds:[],title:'',desc:'',url:'',rev:''};
 const WIZ_LABELS=['Tipo','Associazione','Selezione','Esclusioni','Dettagli','Anteprima'];
-
-function openContentWizard() {
-  Object.assign(WIZ,{step:1,type:'',assoc:'',entity:'',excl:[],selProds:[],title:'',desc:'',url:'',rev:''});
-  renderWizard();
-}
 function renderWizard() {
   const steps=WIZ_LABELS.map((l,i)=>`<div class="wiz-step ${i+1===WIZ.step?'act':i+1<WIZ.step?'done':''}"><div class="wiz-step-n">${i+1<WIZ.step?'✓':(i+1)}</div><div class="wiz-step-l">${l}</div></div>`).join('');
   openModal('Carica contenuto — Passo '+WIZ.step+' di '+WIZ_LABELS.length,
@@ -1679,31 +1610,6 @@ function getMSVals(id){return Array.from(document.querySelectorAll(`#${id} .ms-i
 // ══════════════════════════════════════
 // DUPLICATE MODAL
 // ══════════════════════════════════════
-function openDupModal(kind) {
-  const items=kind==='param'?DB.params:DB.alarms;
-  openModal('Duplica '+(kind==='param'?'Parametri':'Allarmi'),`
-    <div class="fg"><label class="f-label">Sorgente — ${kind==='param'?'Parametri':'Allarmi'} da duplicare</label>
-      <select class="f-sel" id="dup-src">
-        <option value="">— Seleziona —</option>
-        <optgroup label="Da prodotto">${DB.products.map(p=>`<option value="product:${p.id}">${p.emoji} ${p.name}</option>`).join('')}</optgroup>
-        <optgroup label="Da elettronica">${DB.electronics.map(e=>`<option value="electronic:${e.id}">${e.icon} ${e.name}</option>`).join('')}</optgroup>
-      </select>
-    </div>
-    <div class="fg"><label class="f-label">Destinazione</label>
-      <select class="f-sel" id="dup-dst">
-        <option value="">— Seleziona —</option>
-        <optgroup label="A prodotti">${DB.products.map(p=>`<option value="product:${p.id}">${p.emoji} ${p.name}</option>`).join('')}</optgroup>
-        <optgroup label="A elettronica">${DB.electronics.map(e=>`<option value="electronic:${e.id}">${e.icon} ${e.name}</option>`).join('')}</optgroup>
-      </select>
-    </div>
-    <div class="fg"><label class="f-label">Modalità</label>
-      <select class="f-sel" id="dup-mode">
-        <option value="add">Aggiungi ai contenuti esistenti</option>
-        <option value="replace">Sostituisci completamente</option>
-      </select>
-    </div>`,
-    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="executeDup('${kind}')">⧉ Duplica</button>`,'sm');
-}
 function executeDup(kind) {
   const src=$('dup-src')?.value, dst=$('dup-dst')?.value, mode=$('dup-mode')?.value;
   if(!src||!dst){toast('Seleziona sorgente e destinazione','err');return;}
@@ -1725,31 +1631,6 @@ const TEMPLATES = {
   alarms: 'codice,titolo,descrizione,causa,soluzione,priorita,note\nH1,No Depression,Sensore flusso sotto soglia,Tiraggio insufficiente,Verificare canna fumaria,Alta,Note aggiuntive',
 };
 let _impData = null;
-
-function openXlsImport(type) {
-  const labels={products:'Prodotti',params:'Parametri',alarms:'Allarmi'};
-  openModal('Importa '+labels[type]+' da Excel', `
-    ${type!=='products'?`<div class="fg2">
-      <div class="fg"><label class="f-label">Livello</label><select class="f-sel" id="xi-level"><option value="product">Singolo prodotto</option><option value="electronic">Intera elettronica</option></select></div>
-      <div class="fg"><label class="f-label">Entità</label><select class="f-sel" id="xi-entity">
-        <optgroup label="Prodotti">${DB.products.filter(p=>p.active).map(p=>`<option value="product:${p.id}">${p.name}</option>`).join('')}</optgroup>
-        <optgroup label="Elettroniche">${DB.electronics.map(e=>`<option value="electronic:${e.id}">${e.name}</option>`).join('')}</optgroup>
-      </select></div>
-      <div class="fg"><label class="f-label">Modalità</label><select class="f-sel" id="xi-mode"><option value="add">Aggiungi</option><option value="update">Aggiorna esistenti</option><option value="replace">Sostituisci tutto</option></select></div>
-    </div>`:''}
-    <div class="xls-drop" id="xi-drop" onclick="$('xi-file').click()"
-      ondragover="event.preventDefault();this.classList.add('drag')"
-      ondragleave="this.classList.remove('drag')"
-      ondrop="event.preventDefault();this.classList.remove('drag');xDrop(event,'${type}')">
-      <input type="file" id="xi-file" accept=".csv" style="display:none" onchange="xSelect(this,'${type}')">
-      <div class="xls-drop-ic">📊</div>
-      <div class="xls-drop-l">Trascina il file CSV qui</div>
-      <div class="xls-drop-s">.csv — oppure clicca per sfogliare</div>
-    </div>
-    <div style="margin-top:9px"><button class="btn btn-s" onclick="dlTemplate('${type}')">↓ Scarica template CSV</button></div>
-    <div id="xi-prev"></div>`,
-    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" id="xi-confirm" style="display:none" onclick="confirmImport('${type}')">✓ Conferma importazione</button>`,'lg');
-}
 function xSelect(input,type){if(input.files[0])parseCSV(input.files[0],type);}
 function xDrop(e,type){if(e.dataTransfer.files[0])parseCSV(e.dataTransfer.files[0],type);}
 function parseCSV(file,type) {
@@ -1822,110 +1703,14 @@ const USERS = [
   {username:'admin', password:'admin', role:'admin', name:'Amministratore'},
   {username:'cat',   password:'cat',   role:'cat',   name:'Utente CAT'},
 ];
-let curUser = null;
-
-function doLogin() {
-  const u = ($('login-user')?.value||'').trim().toLowerCase();
-  const p = ($('login-pass')?.value||'').trim();
-  const found = USERS.find(x => x.username === u && x.password === p);
-  if (!found) {
-    const err = $('login-err');
-    if(err) { err.style.display='block'; }
-    return;
-  }
-  curUser = found;
-  $('login-screen').style.display = 'none';
-  // Show/hide admin nav button
-  const nb = $('nb-admin');
-  if(nb) nb.style.display = curUser.role==='admin' ? 'inline-flex' : 'none';
-  // Show user name in nav
-  const ui = $('nav-user-info');
-  if(ui) ui.textContent = curUser.name + (curUser.role==='admin' ? ' · Admin' : ' · CAT');
-  initHome();
-  loadFavs();
-}
-
-function doLogout() {
-  curUser = null;
-  $('login-screen').style.display = 'flex';
-  $('login-user').value = '';
-  $('login-pass').value = '';
-  const err = $('login-err');
-  if(err) err.style.display = 'none';
-}
-
-function isAdmin() { return curUser?.role === 'admin'; }
 
 // Guard: show toast if non-admin tries to use admin functions
-function requireAdmin() {
-  if(!isAdmin()) { toast('Accesso riservato agli amministratori','err'); return false; }
-  return true;
-}
 
 // ══════════════════════════════════════
 // FAVOURITES
 // ══════════════════════════════════════
-let FAVS = new Set();
-
-function loadFavs() {
-  try { FAVS = new Set(JSON.parse(localStorage.getItem('ek_favs')||'[]')); } catch(e) { FAVS = new Set(); }
-  renderFavs();
-}
-function saveFavs() {
-  try { localStorage.setItem('ek_favs', JSON.stringify([...FAVS])); } catch(e) {}
-}
-function toggleFav(id) {
-  if(FAVS.has(id)) FAVS.delete(id); else FAVS.add(id);
-  saveFavs();
-  renderFavs();
-  // Refresh fav button on product page if visible
-  const btn = $('fav-btn-'+id);
-  if(btn) btn.textContent = FAVS.has(id) ? '⭐ Preferito' : '☆ Aggiungi ai preferiti';
-  // Refresh star in products table if visible
-  renderProdsTable();
-  toast(FAVS.has(id) ? '⭐ Aggiunto ai preferiti' : '☆ Rimosso dai preferiti');
-}
-function renderFavs() {
-  const grid = $('favs-grid');
-  const empty = $('favs-empty');
-  if(!grid) return;
-  const favProds = DB.products.filter(p => FAVS.has(p.id) && p.active);
-  if(!favProds.length) {
-    grid.innerHTML = '';
-    if(empty) empty.style.display = 'block';
-    return;
-  }
-  if(empty) empty.style.display = 'none';
-  grid.innerHTML = favProds.map(p => `
-    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px 14px;cursor:pointer;transition:all .2s;text-align:center;position:relative;"
-      onmouseover="this.style.boxShadow='var(--sh)';this.style.borderColor='rgba(212,65,10,.3)'"
-      onmouseout="this.style.boxShadow='';this.style.borderColor='var(--border)'"
-      onclick="openProduct('${p.id}')">
-      <button onclick="event.stopPropagation();toggleFav('${p.id}')" style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;opacity:.6;" title="Rimuovi">⭐</button>
-      <div style="font-size:32px;margin-bottom:8px">${p.emoji}</div>
-      <div style="font:700 14px 'Barlow Condensed',sans-serif;color:var(--ink);margin-bottom:3px">${p.name}</div>
-      <div style="font-size:10px;color:var(--ink3)">${getElec(p.elec)?.name||''}</div>
-      <div style="margin-top:8px"><span class="badge bb" style="font-size:9px">${getFamily(p.family)?.name||'—'}</span></div>
-    </div>`).join('');
-}
 
 // Patch admin-only actions to check role
-const _origOpenProductModal = openProductModal;
-function openProductModal(id) { if(!requireAdmin()) return; _origOpenProductModal(id); }
-const _origOpenAlarmModal = openAlarmModal;
-function openAlarmModal(id) { if(!requireAdmin()) return; _origOpenAlarmModal(id); }
-const _origOpenParamModal = openParamModal;
-function openParamModal(id) { if(!requireAdmin()) return; _origOpenParamModal(id); }
-const _origOpenFwModal = openFwModal;
-function openFwModal(id) { if(!requireAdmin()) return; _origOpenFwModal(id); }
-const _origOpenElecModal = openElecModal;
-function openElecModal(id) { if(!requireAdmin()) return; _origOpenElecModal(id); }
-const _origOpenContentWizard = openContentWizard;
-function openContentWizard() { if(!requireAdmin()) return; _origOpenContentWizard(); }
-const _origOpenXlsImport = openXlsImport;
-function openXlsImport(type) { if(!requireAdmin()) return; _origOpenXlsImport(type); }
-const _origOpenDupModal = openDupModal;
-function openDupModal(kind) { if(!requireAdmin()) return; _origOpenDupModal(kind); }
 
 
 
