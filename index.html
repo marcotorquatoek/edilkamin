@@ -15,16 +15,19 @@ input,select,textarea{font-family:'Barlow',sans-serif;}
 a{text-decoration:none;}
 
 /* NAV */
-.nav{background:var(--ink);height:52px;display:flex;align-items:center;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.3);}
-.nav-logo{display:flex;align-items:center;gap:9px;padding:0 18px;border-right:1px solid rgba(255,255,255,.1);height:100%;cursor:pointer;}
-.nav-logo-icon{width:28px;height:28px;background:var(--brand);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;color:#fff;}
-.nav-logo-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;color:#fff;letter-spacing:1px;}
+/* NAV — two rows: row1 = logo+user, row2 = tabs */
+.nav{background:var(--ink);display:flex;flex-direction:column;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.nav-row1{display:flex;align-items:center;height:48px;border-bottom:1px solid rgba(255,255,255,.08);}
+.nav-logo{display:flex;align-items:center;gap:9px;padding:0 16px;cursor:pointer;flex:1;}
+.nav-logo-icon{width:26px;height:26px;background:var(--brand);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:12px;color:#fff;flex-shrink:0;}
+.nav-logo-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:#fff;letter-spacing:1px;}
 .nav-logo-sub{font-size:8px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;display:block;line-height:1;margin-top:1px;}
-.nav-links{display:flex;align-items:center;gap:2px;padding:0 10px;flex:1;}
-.nb{background:none;border:none;color:rgba(255,255,255,.6);font:500 12px 'Barlow',sans-serif;padding:6px 11px;border-radius:4px;transition:all .2s;}
+.nav-right{display:flex;align-items:center;gap:6px;padding:0 12px;flex-shrink:0;}
+.nav-row2{display:flex;align-items:center;height:40px;padding:0 8px;gap:1px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.nav-row2::-webkit-scrollbar{display:none;}
+.nb{background:none;border:none;color:rgba(255,255,255,.55);font:500 12px 'Barlow',sans-serif;padding:6px 12px;border-radius:4px;transition:all .2s;white-space:nowrap;flex-shrink:0;}
 .nb:hover,.nb.active{background:rgba(255,255,255,.08);color:#fff;}
-.nb.active{color:var(--brandL);}
-.nav-right{display:flex;align-items:center;gap:6px;padding:0 14px;border-left:1px solid rgba(255,255,255,.1);height:100%;}
+.nb.active{color:var(--brandL);border-bottom:2px solid var(--brandL);}
 .btn-admin{background:var(--brand);color:#fff;border:none;font:700 11px 'Barlow',sans-serif;padding:6px 12px;border-radius:4px;letter-spacing:.5px;text-transform:uppercase;transition:background .2s;}
 .btn-admin:hover{background:var(--brandL);}
 
@@ -287,13 +290,11 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
 @keyframes su{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
 ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 @media(max-width:768px){
-  /* NAV */
-  .nav{height:auto;flex-wrap:wrap;padding:0;}
-  .nav-logo{padding:0 14px;height:48px;}
-  .nav-links{order:3;width:100%;padding:4px 8px;gap:1px;border-top:1px solid rgba(255,255,255,.08);overflow-x:auto;flex-wrap:nowrap;}
-  .nb{padding:7px 10px;font-size:11px;white-space:nowrap;}
-  .nav-right{padding:0 10px;height:48px;}
-  .btn-admin{font-size:10px;padding:5px 10px;}
+  /* NAV mobile — already two-row, just tweak sizes */
+  .nav-logo-name{font-size:14px;}
+  .nav-row1{height:44px;}
+  .nav-row2{height:38px;}
+  .nb{font-size:11px;padding:5px 10px;}
 
   /* HERO */
   .hero{padding:32px 14px 40px;}
@@ -400,20 +401,27 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
 
 <!-- NAV -->
 <nav class="nav">
-  <div class="nav-logo" onclick="goView('home')">
-    <div class="nav-logo-icon">EK</div>
-    <div><div class="nav-logo-name">EDILKAMIN</div><span class="nav-logo-sub">Portale Tecnico <!-- VERSIONE --> v3</span></div>
+  <!-- Riga 1: logo + utente + esci -->
+  <div class="nav-row1">
+    <div class="nav-logo" onclick="goView('home')">
+      <div class="nav-logo-icon">EK</div>
+      <div>
+        <div class="nav-logo-name">EDILKAMIN</div>
+        <span class="nav-logo-sub">Portale Tecnico <!-- VERSIONE --> v4.0.0</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <span id="nav-user-info" style="font-size:11px;color:rgba(255,255,255,.45);"></span>
+      <button class="btn-admin" onclick="doLogout()" style="background:rgba(255,255,255,.12);font-size:11px;padding:5px 11px;">Esci</button>
+    </div>
   </div>
-  <div class="nav-links">
+  <!-- Riga 2: tab di navigazione -->
+  <div class="nav-row2">
     <button class="nb active" id="nb-home" onclick="goView('home')">🏠 Home</button>
     <button class="nb" id="nb-products" onclick="goView('products')">📋 Prodotti</button>
     <button class="nb" id="nb-docs" onclick="goView('docs')">📄 Documenti</button>
     <button class="nb" id="nb-favs" onclick="goView('favs')">⭐ Preferiti</button>
     <button class="nb" id="nb-admin" onclick="goView('admin')" style="display:none">⚙ Admin</button>
-  </div>
-  <div class="nav-right">
-    <span id="nav-user-info" style="font-size:11px;color:rgba(255,255,255,.5);margin-right:6px;"></span>
-    <button class="btn-admin" onclick="doLogout()" style="background:rgba(255,255,255,.15);">Esci</button>
   </div>
 </nav>
 
@@ -424,7 +432,14 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
     <h1>Tutto su ogni<br><span>prodotto Edilkamin.</span></h1>
     <p>Parametri, allarmi, firmware, manuali, ricambi — logica di ereditarietà e esclusioni incluse.</p>
     <div class="search-box">
-      <input class="s-in" id="name-in" placeholder="🔍 Cerca prodotto… es. Slim, Gora, Iris Plus" oninput="renderChips(this.value)" style="width:100%;margin-bottom:12px">
+      <div style="display:flex;gap:8px;margin-bottom:12px;">
+        <input class="s-in" id="name-in" placeholder="🔍 Cerca prodotto… es. Slim, Gora, Iris Plus"
+          oninput="renderChips(this.value)"
+          onkeydown="if(event.key==='Enter')pickFirstChip()"
+          style="flex:1">
+        <button class="s-btn" onclick="pickFirstChip()">Cerca →</button>
+      </div>
+      <div id="search-no-results" style="display:none;font-size:12px;color:var(--ink3);text-align:center;padding:12px 0;">Nessun prodotto trovato.</div>
       <div class="chip-grid" id="chip-grid"></div>
     </div>
   </div>
@@ -743,20 +758,60 @@ function switchSTab(tab, btn) {
   $('sp-serial').classList.toggle('show', tab==='serial');
   $('sp-name').classList.toggle('show', tab==='name');
 }
-function renderChips(q) {
-  const prods = DB.products.filter(p=>p.active&&(!q||p.name.toLowerCase().includes(q.toLowerCase())||p.codes.some(c=>c.toLowerCase().includes(q.toLowerCase()))));
-  $('chip-grid').innerHTML = prods.map(p=>`<div class="chip" onclick="openProduct('${p.id}')"><span style="font-size:18px">${p.emoji}</span><span class="chip-name">${p.name}</span><span class="chip-sub">${getElec(p.elec)?.name||''}</span></div>`).join('');
+// Cerca su: nome, codice, descrizione, famiglia, elettronica
+function searchProds(q) {
+  if(!q) return DB.products.filter(p=>p.active);
+  const ql = q.toLowerCase().trim();
+  return DB.products.filter(p => {
+    if(!p.active) return false;
+    if(p.name.toLowerCase().includes(ql)) return true;
+    if(p.codes.some(c=>c.toLowerCase().includes(ql))) return true;
+    if((p.desc||'').toLowerCase().includes(ql)) return true;
+    if((getElec(p.elec)?.name||'').toLowerCase().includes(ql)) return true;
+    if((getFamily(p.family)?.name||'').toLowerCase().includes(ql)) return true;
+    return false;
+  });
 }
-function doSearch() {
-  const raw = $('serial-in').value.trim().toUpperCase();
-  const res = $('serial-res');
-  if(!raw) { res.innerHTML=''; return; }
-  const rules = [...DB.serials].sort((a,b)=>a.pri-b.pri);
-  let found = null;
-  for(const r of rules) { if(raw.includes(r.pattern.toUpperCase())||raw.startsWith(r.pattern.toUpperCase())) { found=getProduct(r.prod); break; } }
-  if(!found) found = DB.products.find(p=>p.codes.some(c=>c.toUpperCase().includes(raw)||raw.includes(c.toUpperCase())));
-  if(found) res.innerHTML=`<div class="result-box" onclick="openProduct('${found.id}')"><span style="font-size:34px">${found.emoji}</span><div style="flex:1"><strong style="font:800 19px 'Barlow Condensed',sans-serif">${found.name}</strong><div style="font-size:11px;color:var(--ink3);margin-top:2px">${found.codes[0]} | ${getElec(found.elec)?.name||'—'}</div></div><span style="font-size:20px;color:var(--brand)">→</span></div>`;
-  else res.innerHTML=`<div class="result-nf">⚠ Nessun prodotto trovato per "<strong>${raw}</strong>".</div>`;
+
+function renderChips(q) {
+  const prods = searchProds(q);
+  const noRes = $('search-no-results');
+  if(!prods.length) {
+    if(noRes) noRes.style.display = 'block';
+    $('chip-grid').innerHTML = '';
+    return;
+  }
+  if(noRes) noRes.style.display = 'none';
+  $('chip-grid').innerHTML = prods.map(p=>`
+    <div class="chip" onclick="selectChip('${p.id}')">
+      <span style="font-size:18px">${p.emoji}</span>
+      <span class="chip-name">${p.name}</span>
+      <span class="chip-sub">${getElec(p.elec)?.name||''}</span>
+    </div>`).join('');
+}
+
+// Seleziona chip: apre prodotto e svuota la barra
+function selectChip(id) {
+  const inp = $('name-in');
+  if(inp) { inp.value = ''; }
+  renderChips('');
+  openProduct(id);
+}
+
+// Premi Invio o "Cerca": apre il primo risultato se unico, altrimenti evidenzia
+function pickFirstChip() {
+  const q = $('name-in')?.value?.trim() || '';
+  const prods = searchProds(q);
+  if(prods.length === 1) {
+    // Un solo risultato: apri subito e svuota
+    selectChip(prods[0].id);
+  } else if(prods.length === 0) {
+    toast('Nessun prodotto trovato per "'+q+'"','err');
+  } else {
+    // Più risultati: mostra i chip e porta il focus su di essi
+    renderChips(q);
+    $('chip-grid')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+  }
 }
 
 // ══════════════════════════════════════
@@ -771,7 +826,16 @@ function fillProdFilters() {
 function renderProdsTable() {
   const q=(getVal('prod-srch')).toLowerCase();
   const ef=getVal('prod-f-elec');
-  const prods=DB.products.filter(p=>(!q||p.name.toLowerCase().includes(q)||p.codes.some(c=>c.toLowerCase().includes(q)))&&(!ef||p.elec===ef));
+  const prods=DB.products.filter(p=>{
+    const matchElec=!ef||p.elec===ef;
+    if(!matchElec) return false;
+    if(!q) return true;
+    return p.name.toLowerCase().includes(q)||
+      p.codes.some(c=>c.toLowerCase().includes(q))||
+      (p.desc||'').toLowerCase().includes(q)||
+      (getElec(p.elec)?.name||'').toLowerCase().includes(q)||
+      (getFamily(p.family)?.name||'').toLowerCase().includes(q);
+  });
   $('prod-cnt').textContent=prods.length+' prodotti';
   $('prod-tbody').innerHTML=prods.map(p=>`<tr onclick="openProduct('${p.id}')">
     <td><div class="p-name-cell"><div class="p-avatar">${p.emoji}</div><div class="p-name-txt"><strong>${p.name}</strong><span>${p.codes[0]}</span></div></div></td>
@@ -1551,7 +1615,6 @@ function dlTemplate(type){const a=document.createElement('a');a.href='data:text/
 const USERS = [
   {username:'admin', password:'admin', role:'admin', name:'Amministratore'},
   {username:'cat',   password:'cat',   role:'cat',   name:'Utente CAT'},
-  {username:'CAT600822',   password:'Prova',   role:'cat',   name:'Utente CAT'},
 ];
 let curUser = null;
 
