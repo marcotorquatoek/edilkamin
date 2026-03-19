@@ -377,20 +377,43 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
 </head>
 <body>
 
+<!-- LOGIN SCREEN -->
+<div id="login-screen" style="position:fixed;inset:0;background:var(--ink);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px;">
+  <div style="background:#fff;border-radius:var(--rl);padding:36px 32px;width:100%;max-width:380px;box-shadow:var(--shlg);">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:28px;">
+      <div style="width:36px;height:36px;background:var(--brand);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;color:#fff;">EK</div>
+      <div><div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:20px;letter-spacing:1px;">EDILKAMIN</div><div style="font-size:10px;color:var(--ink3);letter-spacing:2px;text-transform:uppercase;">Portale Tecnico</div></div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font:600 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--ink2);display:block;margin-bottom:5px;">Username</label>
+      <input class="f-in" id="login-user" placeholder="Il tuo username" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="font:600 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--ink2);display:block;margin-bottom:5px;">Password</label>
+      <input class="f-in" type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div id="login-err" style="display:none;background:#FFE6E6;border:1px solid #FFB0B0;border-radius:var(--r);padding:9px 12px;font-size:12px;color:#B00000;margin-bottom:14px;">⚠ Credenziali non valide.</div>
+    <button onclick="doLogin()" style="width:100%;background:var(--brand);color:#fff;border:none;border-radius:var(--r);padding:12px;font:700 14px 'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Accedi →</button>
+    <div style="margin-top:14px;font-size:11px;color:var(--ink3);text-align:center;"><!-- credenziali: admin/admin · cat/cat --></div>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav class="nav">
   <div class="nav-logo" onclick="goView('home')">
     <div class="nav-logo-icon">EK</div>
     <div><div class="nav-logo-name">EDILKAMIN</div><span class="nav-logo-sub">Portale Tecnico <!-- VERSIONE --> v1.0.0</span></div>
   </div>
-  </div>
   <div class="nav-links">
     <button class="nb active" id="nb-home" onclick="goView('home')">🏠 Home</button>
     <button class="nb" id="nb-products" onclick="goView('products')">📋 Prodotti</button>
     <button class="nb" id="nb-docs" onclick="goView('docs')">📄 Documenti</button>
+    <button class="nb" id="nb-favs" onclick="goView('favs')">⭐ Preferiti</button>
+    <button class="nb" id="nb-admin" onclick="goView('admin')" style="display:none">⚙ Admin</button>
   </div>
   <div class="nav-right">
-    <button class="btn-admin" onclick="goView('admin')">⚙ Admin</button>
+    <span id="nav-user-info" style="font-size:11px;color:rgba(255,255,255,.5);margin-right:6px;"></span>
+    <button class="btn-admin" onclick="doLogout()" style="background:rgba(255,255,255,.15);">Esci</button>
   </div>
 </nav>
 
@@ -401,22 +424,8 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
     <h1>Tutto su ogni<br><span>prodotto Edilkamin.</span></h1>
     <p>Parametri, allarmi, firmware, manuali, ricambi — logica di ereditarietà e esclusioni incluse.</p>
     <div class="search-box">
-      <div class="s-tabs">
-        <button class="s-tab active" onclick="switchSTab('serial',this)">🔢 Matricola</button>
-        <button class="s-tab" onclick="switchSTab('name',this)">🔍 Nome</button>
-      </div>
-      <div id="sp-serial" class="s-panel show">
-        <div class="s-row">
-          <input class="s-in" id="serial-in" placeholder="Es: ASL05AIR, AKIKKA, SLIM…" onkeydown="if(event.key==='Enter')doSearch()">
-          <button class="s-btn" onclick="doSearch()">Cerca →</button>
-        </div>
-        <div class="s-hint">Matricola completa o codice prodotto</div>
-        <div id="serial-res"></div>
-      </div>
-      <div id="sp-name" class="s-panel">
-        <input class="s-in" id="name-in" placeholder="Es: Slim, Gora, Iris Plus…" oninput="renderChips(this.value)" style="width:100%;margin-bottom:9px">
-        <div class="chip-grid" id="chip-grid"></div>
-      </div>
+      <input class="s-in" id="name-in" placeholder="🔍 Cerca prodotto… es. Slim, Gora, Iris Plus" oninput="renderChips(this.value)" style="width:100%;margin-bottom:12px">
+      <div class="chip-grid" id="chip-grid"></div>
     </div>
   </div>
   <div class="home-stats">
@@ -438,9 +447,8 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
     <div class="toolbar">
       <input class="t-in" id="prod-srch" placeholder="🔍 Cerca…" oninput="renderProdsTable()">
       <select class="t-sel" id="prod-f-elec" onchange="renderProdsTable()"><option value="">Tutte le elettroniche</option></select>
-      <select class="t-sel" id="prod-f-type" onchange="renderProdsTable()"><option value="">Tutti i tipi</option></select>
     </div>
-    <div class="tbl-wrap"><table><thead><tr><th>Prodotto</th><th>Tipo</th><th>Elettronica</th><th>Famiglia</th><th>Stato</th><th></th></tr></thead>
+    <div class="tbl-wrap"><table><thead><tr><th>Prodotto</th><th>Elettronica</th><th>Famiglia</th><th>Stato</th><th>⭐</th><th></th></tr></thead>
     <tbody id="prod-tbody"></tbody></table></div>
   </div>
 </div>
@@ -464,6 +472,19 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
     </div>
     <div class="tbl-wrap"><table><thead><tr><th>Titolo</th><th>Tipo</th><th>Livello</th><th>Associato a</th><th>Esclusi</th><th>Rev.</th><th></th></tr></thead>
     <tbody id="docs-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- FAVS -->
+<div class="view" id="view-favs">
+  <div class="pw">
+    <div class="sec-hdr" style="margin-bottom:14px"><span class="sec-ttl">⭐ Preferiti</span><span class="sec-sub">I tuoi prodotti salvati</span></div>
+    <div class="chip-grid" id="favs-grid" style="max-height:none;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;"></div>
+    <div id="favs-empty" style="display:none;text-align:center;padding:48px 20px;color:var(--ink3);">
+      <div style="font-size:36px;margin-bottom:10px;">☆</div>
+      <h3 style="font-size:16px;color:var(--ink2);margin-bottom:5px;">Nessun preferito</h3>
+      <p>Apri un prodotto e clicca ☆ per aggiungerlo qui.</p>
+    </div>
   </div>
 </div>
 
@@ -691,9 +712,10 @@ function goView(name) {
   const el = $('view-'+name); if(el) el.classList.add('active');
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
   const nb = $('nb-'+name); if(nb) nb.classList.add('active');
-  if(name==='products') { renderProdsTable(); fillProdFilters(); }
   if(name==='docs') renderDocsTable();
-  if(name==='admin') renderAllAdmin();
+  if(name==='products') { renderProdsTable(); fillProdFilters(); }
+  if(name==='favs') renderFavs();
+  if(name==='admin') { if(!isAdmin()){toast('Accesso riservato agli amministratori','err');goView('home');return;} renderAllAdmin(); }
 }
 
 // ══════════════════════════════════════
@@ -745,19 +767,18 @@ function fillProdFilters() {
     const sel=$(id); if(!sel||sel.children.length>1) return;
     DB.electronics.forEach(e=>{ const o=document.createElement('option'); o.value=e.id; o.textContent=e.name; sel.appendChild(o); });
   });
-  const tf=$('prod-f-type'); if(tf&&tf.children.length<2) DB.productTypes.forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; tf.appendChild(o); });
 }
 function renderProdsTable() {
   const q=(getVal('prod-srch')).toLowerCase();
-  const ef=getVal('prod-f-elec'), tf=getVal('prod-f-type');
-  const prods=DB.products.filter(p=>(!q||p.name.toLowerCase().includes(q)||p.codes.some(c=>c.toLowerCase().includes(q)))&&(!ef||p.elec===ef)&&(!tf||p.type===tf));
+  const ef=getVal('prod-f-elec');
+  const prods=DB.products.filter(p=>(!q||p.name.toLowerCase().includes(q)||p.codes.some(c=>c.toLowerCase().includes(q)))&&(!ef||p.elec===ef));
   $('prod-cnt').textContent=prods.length+' prodotti';
   $('prod-tbody').innerHTML=prods.map(p=>`<tr onclick="openProduct('${p.id}')">
     <td><div class="p-name-cell"><div class="p-avatar">${p.emoji}</div><div class="p-name-txt"><strong>${p.name}</strong><span>${p.codes[0]}</span></div></div></td>
-    <td><span class="badge bp">${p.type}</span></td>
     <td><span class="badge bb">${getElec(p.elec)?.name||'—'}</span></td>
     <td><span class="badge bgr">${getFamily(p.family)?.name||'—'}</span></td>
     <td><span class="badge ${p.active?'bg':'bgr'}">${p.active?'Attivo':'Inattivo'}</span></td>
+    <td><button class="alink" onclick="event.stopPropagation();toggleFav('${p.id}')" title="Aggiungi/rimuovi preferiti">${'FAVS' in window && FAVS.has(p.id)?'⭐':'☆'}</button></td>
     <td><button class="alink" onclick="event.stopPropagation();openProduct('${p.id}')">Apri →</button></td>
   </tr>`).join('');
 }
@@ -794,7 +815,11 @@ function renderProductPage() {
         <div class="prod-meta">
           <h2>${p.name}</h2>
           <div class="code-pills">${p.codes.map(c=>`<span class="code-pill">${c}</span>`).join('')}</div>
-          <div style="margin-bottom:7px"><span class="badge bp">${p.type}</span> <span class="badge ${p.active?'bg':'bgr'}" style="margin-left:3px">${p.active?'Attivo':'Inattivo'}</span></div>
+          <div style="margin-bottom:7px">
+            <span class="badge bgr">${getFamily(p.family)?.name||'—'}</span>
+            <span class="badge ${p.active?'bg':'bgr'}" style="margin-left:3px">${p.active?'Attivo':'Inattivo'}</span>
+            <button onclick="toggleFav('${p.id}')" id="fav-btn-${p.id}" style="margin-left:8px;background:none;border:1.5px solid var(--border);border-radius:var(--r);padding:2px 10px;font-size:13px;cursor:pointer;" title="Aggiungi ai preferiti">${'FAVS' in window && FAVS.has(p.id)?'⭐ Preferito':'☆ Aggiungi ai preferiti'}</button>
+          </div>
           <div class="prod-attrs">
             <div class="prod-attr"><span class="prod-attr-l">Elettronica:</span><span class="prod-attr-v">${elec?.name||'—'} ${elec?.icon||''}</span></div>
             <div class="prod-attr"><span class="prod-attr-l">Famiglia:</span><span class="prod-attr-v">${fam?.name||'—'}</span></div>
@@ -1023,10 +1048,10 @@ function renderAProd() {
   const q=(getVal('ap-prod-srch')).toLowerCase();
   const ef=getVal('ap-prod-elec');
   const prods=DB.products.filter(p=>(!q||p.name.toLowerCase().includes(q)||p.codes[0].toLowerCase().includes(q))&&(!ef||p.elec===ef));
-  $('ap-prod-list').innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Prodotto</th><th>Tipo</th><th>Codice</th><th>Elettronica</th><th>Stato</th><th>Azioni</th></tr></thead>
+  $('ap-prod-list').innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Prodotto</th><th>Famiglia</th><th>Codice</th><th>Elettronica</th><th>Stato</th><th>Azioni</th></tr></thead>
   <tbody>${prods.map(p=>`<tr>
     <td><strong>${p.emoji} ${p.name}</strong></td>
-    <td><span class="badge bp">${p.type}</span></td>
+    <td><span class="badge bgr">${getFamily(p.family)?.name||'—'}</span></td>
     <td style="font-size:11px;font-family:monospace">${p.codes[0]}</td>
     <td><span class="badge bb">${getElec(p.elec)?.name||'—'}</span></td>
     <td><span class="badge ${p.active?'bg':'bgr'}">${p.active?'Attivo':'Inattivo'}</span></td>
@@ -1518,9 +1543,125 @@ function confirmImport(type) {
 function dlTemplate(type){const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(TEMPLATES[type]||'');a.download=`template_${type}.csv`;a.click();}
 
 // ══════════════════════════════════════
+// AUTH — LOGIN / LOGOUT
+// ══════════════════════════════════════
+// UTENTI: aggiungi qui utenti e ruoli
+// role: 'admin' → vede tutto + Admin panel
+// role: 'cat'   → solo consultazione, nessuna modifica
+const USERS = [
+  {username:'admin', password:'admin', role:'admin', name:'Amministratore'},
+  {username:'cat',   password:'cat',   role:'cat',   name:'Utente CAT'},
+];
+let curUser = null;
+
+function doLogin() {
+  const u = ($('login-user')?.value||'').trim().toLowerCase();
+  const p = ($('login-pass')?.value||'').trim();
+  const found = USERS.find(x => x.username === u && x.password === p);
+  if (!found) {
+    const err = $('login-err');
+    if(err) { err.style.display='block'; }
+    return;
+  }
+  curUser = found;
+  $('login-screen').style.display = 'none';
+  // Show/hide admin nav button
+  const nb = $('nb-admin');
+  if(nb) nb.style.display = curUser.role==='admin' ? 'inline-flex' : 'none';
+  // Show user name in nav
+  const ui = $('nav-user-info');
+  if(ui) ui.textContent = curUser.name + (curUser.role==='admin' ? ' · Admin' : ' · CAT');
+  initHome();
+  loadFavs();
+}
+
+function doLogout() {
+  curUser = null;
+  $('login-screen').style.display = 'flex';
+  $('login-user').value = '';
+  $('login-pass').value = '';
+  const err = $('login-err');
+  if(err) err.style.display = 'none';
+}
+
+function isAdmin() { return curUser?.role === 'admin'; }
+
+// Guard: show toast if non-admin tries to use admin functions
+function requireAdmin() {
+  if(!isAdmin()) { toast('Accesso riservato agli amministratori','err'); return false; }
+  return true;
+}
+
+// ══════════════════════════════════════
+// FAVOURITES
+// ══════════════════════════════════════
+let FAVS = new Set();
+
+function loadFavs() {
+  try { FAVS = new Set(JSON.parse(localStorage.getItem('ek_favs')||'[]')); } catch(e) { FAVS = new Set(); }
+  renderFavs();
+}
+function saveFavs() {
+  try { localStorage.setItem('ek_favs', JSON.stringify([...FAVS])); } catch(e) {}
+}
+function toggleFav(id) {
+  if(FAVS.has(id)) FAVS.delete(id); else FAVS.add(id);
+  saveFavs();
+  renderFavs();
+  // Refresh fav button on product page if visible
+  const btn = $('fav-btn-'+id);
+  if(btn) btn.textContent = FAVS.has(id) ? '⭐ Preferito' : '☆ Aggiungi ai preferiti';
+  // Refresh star in products table if visible
+  renderProdsTable();
+  toast(FAVS.has(id) ? '⭐ Aggiunto ai preferiti' : '☆ Rimosso dai preferiti');
+}
+function renderFavs() {
+  const grid = $('favs-grid');
+  const empty = $('favs-empty');
+  if(!grid) return;
+  const favProds = DB.products.filter(p => FAVS.has(p.id) && p.active);
+  if(!favProds.length) {
+    grid.innerHTML = '';
+    if(empty) empty.style.display = 'block';
+    return;
+  }
+  if(empty) empty.style.display = 'none';
+  grid.innerHTML = favProds.map(p => `
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px 14px;cursor:pointer;transition:all .2s;text-align:center;position:relative;"
+      onmouseover="this.style.boxShadow='var(--sh)';this.style.borderColor='rgba(212,65,10,.3)'"
+      onmouseout="this.style.boxShadow='';this.style.borderColor='var(--border)'"
+      onclick="openProduct('${p.id}')">
+      <button onclick="event.stopPropagation();toggleFav('${p.id}')" style="position:absolute;top:8px;right:8px;background:none;border:none;font-size:14px;cursor:pointer;opacity:.6;" title="Rimuovi">⭐</button>
+      <div style="font-size:32px;margin-bottom:8px">${p.emoji}</div>
+      <div style="font:700 14px 'Barlow Condensed',sans-serif;color:var(--ink);margin-bottom:3px">${p.name}</div>
+      <div style="font-size:10px;color:var(--ink3)">${getElec(p.elec)?.name||''}</div>
+      <div style="margin-top:8px"><span class="badge bb" style="font-size:9px">${getFamily(p.family)?.name||'—'}</span></div>
+    </div>`).join('');
+}
+
+// Patch admin-only actions to check role
+const _origOpenProductModal = openProductModal;
+function openProductModal(id) { if(!requireAdmin()) return; _origOpenProductModal(id); }
+const _origOpenAlarmModal = openAlarmModal;
+function openAlarmModal(id) { if(!requireAdmin()) return; _origOpenAlarmModal(id); }
+const _origOpenParamModal = openParamModal;
+function openParamModal(id) { if(!requireAdmin()) return; _origOpenParamModal(id); }
+const _origOpenFwModal = openFwModal;
+function openFwModal(id) { if(!requireAdmin()) return; _origOpenFwModal(id); }
+const _origOpenElecModal = openElecModal;
+function openElecModal(id) { if(!requireAdmin()) return; _origOpenElecModal(id); }
+const _origOpenContentWizard = openContentWizard;
+function openContentWizard() { if(!requireAdmin()) return; _origOpenContentWizard(); }
+const _origOpenXlsImport = openXlsImport;
+function openXlsImport(type) { if(!requireAdmin()) return; _origOpenXlsImport(type); }
+const _origOpenDupModal = openDupModal;
+function openDupModal(kind) { if(!requireAdmin()) return; _origOpenDupModal(kind); }
+
+// ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
-initHome();
+// Non chiamare initHome() subito — aspetta il login
+// initHome() verrà chiamato da doLogin()
 </script>
 </body>
 </html>
