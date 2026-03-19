@@ -425,7 +425,7 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
   <div style="background:#fff;border-radius:var(--rl);padding:36px 32px;width:100%;max-width:380px;box-shadow:var(--shlg);">
     <div style="text-align:center;margin-bottom:28px;">
       <img id="login-logo-img" alt="Edilkamin Docs" style="width:100%;max-width:280px;height:auto;display:block;margin:0 auto 10px;">
-      <div style="font-size:12px;font-weight:600;color:var(--ink3);letter-spacing:1px;">v19</div>
+      <div style="font-size:12px;font-weight:600;color:var(--ink3);letter-spacing:1px;">v20</div>
     </div>
     <div style="margin-bottom:14px;">
       <label style="font:600 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--ink2);display:block;margin-bottom:5px;">Username</label>
@@ -449,7 +449,7 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
       <div class="nav-logo-icon"><img id="nav-logo-img" style="width:52px;height:52px;object-fit:contain;" alt="EK"></div>
       <div>
         <div class="nav-logo-name">EDILKAMIN <span>DOCS</span></div>
-        <span class="nav-logo-sub" style="font-size:13px;font-weight:700;color:#fff;letter-spacing:1px;">v19</span>
+        <span class="nav-logo-sub" style="font-size:13px;font-weight:700;color:#fff;letter-spacing:1px;">v20</span>
       </div>
     </div>
     <div class="nav-right">
@@ -1984,7 +1984,7 @@ async function saveElecContent(id) {
   const title = getVal('ec-title');
   const elec = $('ec-elec')?.value;
   if(!title) { toast('Titolo obbligatorio','err'); return; }
-  if(!elec) { toast('Seleziona l'elettronica','err'); return; }
+  if(!elec) { toast("Seleziona l'elettronica",'err'); return; }
   const data = {
     title, type: $('ec-type').value, level:'electronic', entity: elec,
     excl:[], desc: getVal('ec-desc'), url: getVal('ec-url')||'#',
@@ -2040,7 +2040,7 @@ async function saveElecFw(id) {
   const name = getVal('efw-name');
   const elec = $('efw-elec')?.value;
   if(!name) { toast('Nome obbligatorio','err'); return; }
-  if(!elec) { toast('Seleziona l'elettronica','err'); return; }
+  if(!elec) { toast("Seleziona l'elettronica",'err'); return; }
   const data = {
     name, version: getVal('efw-ver'), date: getVal('efw-date')||today(),
     notes: getVal('efw-notes'), level:'electronic', entity: elec, excl:[]
