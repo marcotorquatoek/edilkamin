@@ -388,12 +388,12 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
       <div style="width:36px;height:36px;background:var(--brand);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;color:#fff;">EK</div>
       <div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:24px;letter-spacing:.5px;line-height:1;">EDILKAMIN <span style="color:var(--brand);">DOCS</span></div>
-        <div style="font-size:10px;color:var(--ink3);letter-spacing:1px;margin-top:2px;">v6</div>
+        <div style="font-size:10px;color:var(--ink3);letter-spacing:1px;margin-top:2px;">v8</div>
       </div>
     </div>
     <div style="margin-bottom:14px;">
       <label style="font:600 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--ink2);display:block;margin-bottom:5px;">Username</label>
-      <input class="f-in" id="login-user" placeholder="La tua email CAT" onkeydown="if(event.key==='Enter')doLogin()">
+      <input class="f-in" id="login-user" placeholder="Es: CAT602081" onkeydown="if(event.key==='Enter')doLogin()">
     </div>
     <div style="margin-bottom:20px;">
       <label style="font:600 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--ink2);display:block;margin-bottom:5px;">Password</label>
@@ -413,7 +413,7 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
       <div class="nav-logo-icon">EK</div>
       <div>
         <div class="nav-logo-name">EDILKAMIN <span>DOCS</span></div>
-        <span class="nav-logo-sub"><!-- VERSIONE --> v6</span>
+        <span class="nav-logo-sub"><!-- VERSIONE --> v8</span>
       </div>
     </div>
     <div class="nav-right">
@@ -600,6 +600,13 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
 // HELPERS
 // ══════════════════════════════════════
 const $ = id => document.getElementById(id);
+
+// ── DB lookup helpers ──────────────────────────────────────
+const getElec    = id => DB.electronics.find(e => e.id === id) || null;
+const getFamily  = id => DB.families.find(f => f.id === id) || null;
+const getApp     = id => DB.apps.find(a => a.id === id) || null;
+const getProduct = id => DB.products.find(p => p.id === id) || null;
+
 const toast = (msg, type='') => {
   const t = $('toast-el');
   t.textContent = msg; t.className = 'toast' + (type ? ' '+type : '');
@@ -772,7 +779,10 @@ async function doLogin() {
   const emailEl = $('login-user');
   const passEl  = $('login-pass');
   const errEl   = $('login-err');
-  const email   = (emailEl?.value||'').trim();
+  const raw     = (emailEl?.value||'').trim();
+  // Converte codice CAT in email fittizia per Supabase
+  // Se è già un'email (es. admin) la usa direttamente
+  const email   = raw.includes('@') ? raw : raw.toLowerCase()+'@edilkamin-docs.internal';
   const pass    = (passEl?.value||'').trim();
 
   // Reset error
@@ -872,7 +882,7 @@ async function checkSession() {
         .select('full_name,role,active').eq('id',session.user.id).single();
       const active = !profile || profile.active !== false;
       if(active) {
-        curUser = {id:session.user.id, email:session.user.email, name:(profile?.full_name||session.user.email), role:(profile?.role||'cat')};
+        curUser = {id:session.user.id, email:session.user.email, name:(profile?.full_name||session.user.email.split('@')[0].toUpperCase()), role:(profile?.role||'cat')};
         $('login-screen').style.display='none';
         const nb=$('nb-admin'); if(nb) nb.style.display=curUser.role==='admin'?'inline-flex':'none';
         const ui=$('nav-user-info'); if(ui) ui.textContent=curUser.name+(curUser.role==='admin'?' · Admin':'');
