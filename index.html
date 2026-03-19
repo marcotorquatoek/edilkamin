@@ -388,7 +388,7 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
       <div style="width:36px;height:36px;background:var(--brand);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:16px;color:#fff;">EK</div>
       <div>
         <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:24px;letter-spacing:.5px;line-height:1;">EDILKAMIN <span style="color:var(--brand);">DOCS</span></div>
-        <div style="font-size:10px;color:var(--ink3);letter-spacing:1px;margin-top:2px;">v8</div>
+        <div style="font-size:16px;font-weight:900;color:var(--ink2);letter-spacing:1px;margin-top:2px;">v9</div>
       </div>
     </div>
     <div style="margin-bottom:14px;">
@@ -413,7 +413,7 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
       <div class="nav-logo-icon">EK</div>
       <div>
         <div class="nav-logo-name">EDILKAMIN <span>DOCS</span></div>
-        <span class="nav-logo-sub"><!-- VERSIONE --> v8</span>
+        <span class="nav-logo-sub" style="font-size:13px;font-weight:700;color:#fff;letter-spacing:1px;">v9</span>
       </div>
     </div>
     <div class="nav-right">
@@ -438,15 +438,12 @@ tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
     <h1>Tutto su ogni<br><span>prodotto Edilkamin.</span></h1>
     <p>Parametri, allarmi, firmware, manuali, ricambi — logica di ereditarietà e esclusioni incluse.</p>
     <div class="search-box">
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <div style="display:flex;gap:8px;margin-bottom:4px;">
         <input class="s-in" id="name-in" placeholder="🔍 Cerca prodotto… es. Slim, Gora, Iris Plus"
-          oninput="renderChips(this.value)"
           onkeydown="if(event.key==='Enter')pickFirstChip()"
           style="flex:1">
         <button class="s-btn" onclick="pickFirstChip()">Cerca →</button>
       </div>
-      <div id="search-no-results" style="display:none;font-size:12px;color:var(--ink3);text-align:center;padding:12px 0;">Nessun prodotto trovato.</div>
-      <div class="chip-grid" id="chip-grid"></div>
     </div>
   </div>
   <div class="home-stats">
@@ -973,16 +970,39 @@ function initHome() {
   $('st-elec').textContent = DB.electronics.length;
   $('st-doc').textContent = DB.contents.length;
   $('st-par').textContent = DB.params.length;
-  $('elec-cards').innerHTML = DB.electronics.map(e => {
-    const n = DB.products.filter(p=>p.elec===e.id&&p.active).length;
-    return `<div class="elec-card" onclick="goView('products');setTimeout(()=>{$('prod-f-elec').value='${e.id}';renderProdsTable();},50)">
-      <div style="font-size:24px;margin-bottom:7px">${e.icon}</div>
-      <div style="font:700 14px 'Barlow Condensed',sans-serif;margin-bottom:2px">${e.name}</div>
-      <div style="font-size:10px;color:var(--ink3);margin-bottom:9px;line-height:1.4">${e.desc}</div>
-      <div style="font:600 11px 'Barlow',sans-serif;color:var(--brand)">↗ ${n} prodotti</div>
+
+  // Raggruppa le elettroniche per "famiglia" (parte del nome prima di cifre/underscore)
+  // Es: L023_7, L023_6 → gruppo "L023"; LX128, LX32, LX64 → gruppo "LX"; MICRONOVA → gruppo "MICRONOVA"
+  // Usiamo il prefisso testuale prima del primo numero o underscore
+  function elecGroup(name) {
+    const m = name.match(/^([A-Za-z]+)/);
+    return m ? m[1].toUpperCase() : name.toUpperCase();
+  }
+  // Costruisci mappa gruppo → array di elettroniche
+  const groups = {};
+  DB.electronics.forEach(e => {
+    const g = elecGroup(e.name);
+    if(!groups[g]) groups[g] = [];
+    groups[g].push(e);
+  });
+  // Per ogni gruppo, prendi la prima elettronica come rappresentante e conta i prodotti totali del gruppo
+  $('elec-cards').innerHTML = Object.entries(groups).map(([gName, elecs]) => {
+    const rep = elecs[0];
+    const totalProds = elecs.reduce((sum, e) => sum + DB.products.filter(p=>p.elec===e.id&&p.active).length, 0);
+    const ids = elecs.map(e=>e.id);
+    const onclick = elecs.length === 1
+      ? `goView('products');setTimeout(()=>{$('prod-f-elec').value='${rep.id}';renderProdsTable();},50)`
+      : `goView('products');setTimeout(()=>{$('prod-f-elec').value='';renderProdsTable();},50)`;
+    // Descrizione: prendi la parte comune (dopo il " — ") oppure usa quella del rappresentante
+    const descParts = [...new Set(elecs.map(e => e.desc.split('—').slice(1).join('—').trim()).filter(Boolean))];
+    const desc = descParts[0] || rep.desc;
+    return `<div class="elec-card" onclick="${onclick}">
+      <div style="font-size:24px;margin-bottom:7px">${rep.icon}</div>
+      <div style="font:700 14px 'Barlow Condensed',sans-serif;margin-bottom:2px">${gName}</div>
+      <div style="font-size:10px;color:var(--ink3);margin-bottom:9px;line-height:1.4">${desc}</div>
+      <div style="font:600 11px 'Barlow',sans-serif;color:var(--brand)">↗ ${totalProds} prodotti</div>
     </div>`;
   }).join('');
-  renderChips('');
 }
 function switchSTab(tab, btn) {
   document.querySelectorAll('.s-tab').forEach(b=>b.classList.remove('active'));
@@ -1006,43 +1026,29 @@ function searchProds(q) {
 }
 
 function renderChips(q) {
-  const prods = searchProds(q);
-  const noRes = $('search-no-results');
-  if(!prods.length) {
-    if(noRes) noRes.style.display = 'block';
-    $('chip-grid').innerHTML = '';
-    return;
-  }
-  if(noRes) noRes.style.display = 'none';
-  $('chip-grid').innerHTML = prods.map(p=>`
-    <div class="chip" onclick="selectChip('${p.id}')">
-      <span style="font-size:18px">${p.emoji}</span>
-      <span class="chip-name">${p.name}</span>
-      <span class="chip-sub">${getElec(p.elec)?.name||''}</span>
-    </div>`).join('');
+  // kept for compatibility but not shown in UI
 }
 
-// Seleziona chip: apre prodotto e svuota la barra
+// Seleziona chip: apre prodotto
 function selectChip(id) {
   const inp = $('name-in');
   if(inp) { inp.value = ''; }
-  renderChips('');
   openProduct(id);
 }
 
-// Premi Invio o "Cerca": apre il primo risultato se unico, altrimenti evidenzia
+// Premi Invio o "Cerca": apre prodotto se trovato, altrimenti vai alla tab prodotti
 function pickFirstChip() {
   const q = $('name-in')?.value?.trim() || '';
+  if(!q) { goView('products'); return; }
   const prods = searchProds(q);
   if(prods.length === 1) {
-    // Un solo risultato: apri subito e svuota
     selectChip(prods[0].id);
   } else if(prods.length === 0) {
     toast('Nessun prodotto trovato per "'+q+'"','err');
   } else {
-    // Più risultati: mostra i chip e porta il focus su di essi
-    renderChips(q);
-    $('chip-grid')?.scrollIntoView({behavior:'smooth',block:'nearest'});
+    // Vai alla tab prodotti con il filtro applicato
+    goView('products');
+    setTimeout(()=>{ const inp=$('prod-srch'); if(inp){inp.value=q; renderProdsTable();} },50);
   }
 }
 
@@ -1077,6 +1083,64 @@ function renderProdsTable() {
     <td><button class="alink" onclick="event.stopPropagation();toggleFav('${p.id}')" title="Aggiungi/rimuovi preferiti">${'FAVS' in window && FAVS.has(p.id)?'⭐':'☆'}</button></td>
     <td><button class="alink" onclick="event.stopPropagation();openProduct('${p.id}')">Apri →</button></td>
   </tr>`).join('');
+}
+
+// ══════════════════════════════════════
+// INHERITANCE HELPERS
+// ══════════════════════════════════════
+// Restituisce tutti i prodotti attivi che vedono un contenuto/param/allarme
+function getAffected(level, entityId, excl) {
+  let prods = [];
+  if(level === 'product') {
+    const p = getProduct(entityId);
+    prods = p && p.active ? [p] : [];
+  } else if(level === 'electronic') {
+    prods = DB.products.filter(p => p.elec === entityId && p.active);
+  } else if(level === 'family') {
+    prods = DB.products.filter(p => p.family === entityId && p.active);
+  }
+  return prods.filter(p => !(excl||[]).includes(p.id));
+}
+
+// Restituisce i contenuti visibili per un prodotto (ereditarietà)
+function getContents(p) {
+  return DB.contents.filter(c => {
+    if(!c.visible) return false;
+    if(c.level === 'product' && c.entity === p.id) return !(c.excl||[]).includes(p.id);
+    if(c.level === 'electronic' && c.entity === p.elec) return !(c.excl||[]).includes(p.id);
+    if(c.level === 'family' && c.entity === p.family) return !(c.excl||[]).includes(p.id);
+    return false;
+  });
+}
+
+// Restituisce i parametri visibili per un prodotto (ereditarietà)
+function getParams(p) {
+  return DB.params.filter(pa => {
+    if(pa.level === 'product' && pa.entity === p.id) return !(pa.excl||[]).includes(p.id);
+    if(pa.level === 'electronic' && pa.entity === p.elec) return !(pa.excl||[]).includes(p.id);
+    if(pa.level === 'family' && pa.entity === p.family) return !(pa.excl||[]).includes(p.id);
+    return false;
+  });
+}
+
+// Restituisce gli allarmi visibili per un prodotto (ereditarietà)
+function getAlarms(p) {
+  return DB.alarms.filter(al => {
+    if(al.level === 'product' && al.entity === p.id) return !(al.excl||[]).includes(p.id);
+    if(al.level === 'electronic' && al.entity === p.elec) return !(al.excl||[]).includes(p.id);
+    if(al.level === 'family' && al.entity === p.family) return !(al.excl||[]).includes(p.id);
+    return false;
+  });
+}
+
+// Restituisce i firmware visibili per un prodotto (ereditarietà)
+function getFw(p) {
+  return DB.firmware.filter(fw => {
+    if(fw.level === 'product' && fw.entity === p.id) return !(fw.excl||[]).includes(p.id);
+    if(fw.level === 'electronic' && fw.entity === p.elec) return !(fw.excl||[]).includes(p.id);
+    if(fw.level === 'family' && fw.entity === p.family) return !(fw.excl||[]).includes(p.id);
+    return false;
+  });
 }
 
 // ══════════════════════════════════════
