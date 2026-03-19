@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edilkamin — Portale Tecnico</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--brand:#D4410A;--brandL:#F05A1A;--ink:#1A1A1A;--ink2:#3D3D3D;--ink3:#6B6B6B;--border:#E0E0E0;--bg:#F7F5F2;--white:#fff;--ok:#1A7A4A;--warn:#C07A00;--err:#CC0000;--info:#1A5A9A;--sh:0 4px 16px rgba(0,0,0,.10);--shsm:0 1px 3px rgba(0,0,0,.08);--shlg:0 12px 40px rgba(0,0,0,.14);--r:6px;--rl:12px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--ink);font-size:14px;min-height:100vh;}
+h1,h2,h3,h4{font-family:'Barlow Condensed',sans-serif;}
+button{cursor:pointer;font-family:'Barlow',sans-serif;}
+input,select,textarea{font-family:'Barlow',sans-serif;}
+a{text-decoration:none;}
+
+/* NAV */
+.nav{background:var(--ink);height:52px;display:flex;align-items:center;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.nav-logo{display:flex;align-items:center;gap:9px;padding:0 18px;border-right:1px solid rgba(255,255,255,.1);height:100%;cursor:pointer;}
+.nav-logo-icon{width:28px;height:28px;background:var(--brand);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:13px;color:#fff;}
+.nav-logo-name{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:17px;color:#fff;letter-spacing:1px;}
+.nav-logo-sub{font-size:8px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;display:block;line-height:1;margin-top:1px;}
+.nav-links{display:flex;align-items:center;gap:2px;padding:0 10px;flex:1;}
+.nb{background:none;border:none;color:rgba(255,255,255,.6);font:500 12px 'Barlow',sans-serif;padding:6px 11px;border-radius:4px;transition:all .2s;}
+.nb:hover,.nb.active{background:rgba(255,255,255,.08);color:#fff;}
+.nb.active{color:var(--brandL);}
+.nav-right{display:flex;align-items:center;gap:6px;padding:0 14px;border-left:1px solid rgba(255,255,255,.1);height:100%;}
+.btn-admin{background:var(--brand);color:#fff;border:none;font:700 11px 'Barlow',sans-serif;padding:6px 12px;border-radius:4px;letter-spacing:.5px;text-transform:uppercase;transition:background .2s;}
+.btn-admin:hover{background:var(--brandL);}
+
+/* VIEWS */
+.view{display:none;}.view.active{display:block;}
+
+/* HERO */
+.hero{background:var(--ink);color:#fff;padding:52px 20px 60px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 100%,rgba(212,65,10,.25) 0%,transparent 70%);}
+.hero-badge{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--brandL);border:1px solid rgba(212,65,10,.4);padding:4px 12px;border-radius:20px;margin-bottom:16px;}
+.hero h1{font-size:clamp(34px,5vw,60px);font-weight:900;letter-spacing:-1px;line-height:.95;margin-bottom:14px;position:relative;}
+.hero h1 span{color:var(--brandL);}
+.hero p{color:rgba(255,255,255,.5);font-size:14px;max-width:420px;margin:0 auto 36px;position:relative;}
+.search-box{background:#fff;border-radius:var(--rl);padding:22px;max-width:560px;margin:0 auto;box-shadow:var(--shlg);position:relative;}
+.s-tabs{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:8px;margin-bottom:16px;}
+.s-tab{flex:1;border:none;background:none;padding:6px 10px;border-radius:5px;font:600 12px 'Barlow',sans-serif;color:var(--ink3);transition:all .2s;}
+.s-tab.active{background:#fff;color:var(--ink);box-shadow:var(--shsm);}
+.s-panel{display:none;}.s-panel.show{display:block;}
+.s-row{display:flex;gap:7px;}
+.s-in{flex:1;border:2px solid var(--border);border-radius:var(--r);padding:11px 13px;font:400 13px 'Barlow',sans-serif;outline:none;transition:border-color .2s;background:var(--bg);}
+.s-in:focus{border-color:var(--brand);background:#fff;}
+.s-btn{background:var(--brand);color:#fff;border:none;border-radius:var(--r);padding:11px 18px;font:700 13px 'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase;transition:background .2s;white-space:nowrap;}
+.s-btn:hover{background:var(--brandL);}
+.s-hint{font-size:11px;color:var(--ink3);margin-top:7px;}
+.result-box{background:#FFF8F5;border:2px solid var(--brand);border-radius:var(--rl);padding:14px 18px;margin-top:10px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .2s;animation:su .25s ease;}
+.result-box:hover{box-shadow:var(--sh);}
+.result-nf{background:var(--bg);border:1px solid var(--border);border-radius:var(--rl);padding:14px 18px;margin-top:10px;text-align:center;color:var(--ink3);font-size:13px;}
+.chip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:5px;max-height:240px;overflow-y:auto;}
+.chip{border:1px solid var(--border);border-radius:var(--r);padding:7px 9px;cursor:pointer;transition:all .2s;background:#fff;text-align:center;}
+.chip:hover{border-color:var(--brand);background:#FFF8F5;}
+.chip-name{font:600 12px 'Barlow Condensed',sans-serif;display:block;}
+.chip-sub{font-size:9px;color:var(--ink3);}
+
+/* HOME STATS */
+.home-stats{background:#fff;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);}
+.stat{padding:20px;text-align:center;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-n{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:900;color:var(--brand);display:block;}
+.stat-l{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;}
+.elec-bar{padding:28px 20px;max-width:1060px;margin:0 auto;}
+.sec-hdr{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;}
+.sec-ttl{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;}
+.sec-sub{font-size:11px;color:var(--ink3);}
+.elec-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:9px;}
+.elec-card{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:16px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.elec-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--brand);transform:scaleX(0);transition:transform .25s;}
+.elec-card:hover{box-shadow:var(--sh);border-color:rgba(212,65,10,.2);transform:translateY(-2px);}
+.elec-card:hover::before{transform:scaleX(1);}
+
+/* PAGE WRAP */
+.pw{padding:24px 20px;max-width:1060px;margin:0 auto;}
+
+/* TABLE */
+.tbl-wrap{background:#fff;border-radius:var(--rl);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shsm);}
+table{width:100%;border-collapse:collapse;}
+thead th{background:var(--bg);padding:9px 13px;text-align:left;font:600 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:.7px;color:var(--ink3);border-bottom:1px solid var(--border);}
+tbody td{padding:10px 13px;border-bottom:1px solid var(--bg);font-size:13px;vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover td{background:#FAFAFA;cursor:pointer;}
+.p-name-cell{display:flex;align-items:center;gap:9px;}
+.p-avatar{width:30px;height:30px;background:var(--bg);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;border:1px solid var(--border);}
+.p-name-txt strong{display:block;font-weight:600;font-size:13px;}
+.p-name-txt span{font-size:10px;color:var(--ink3);}
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font:600 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:.3px;}
+.bg{background:#E6F5EE;color:#1A7A4A;} .bo{background:#FFF3E0;color:#B05000;}
+.bb{background:#E6F0FA;color:#1A5A9A;} .bgr{background:#F0F0F0;color:#6B6B6B;}
+.br{background:#FFE6E6;color:#CC0000;} .bp{background:#F0E6FF;color:#6B00CC;}
+.alink{color:var(--brand);font-weight:600;font-size:12px;background:none;border:none;padding:0;}
+.alink:hover{text-decoration:underline;}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.t-in{flex:1;min-width:160px;border:1.5px solid var(--border);border-radius:var(--r);padding:7px 11px;font:400 13px 'Barlow',sans-serif;outline:none;background:#fff;}
+.t-in:focus{border-color:var(--brand);}
+.t-sel{border:1.5px solid var(--border);background:#fff;border-radius:var(--r);padding:7px 11px;font:500 12px 'Barlow',sans-serif;color:var(--ink2);outline:none;}
+
+/* PRODUCT PAGE */
+.prod-header{background:#fff;border-bottom:1px solid var(--border);padding:0 20px;}
+.breadcrumb{padding:11px 0 0;font-size:11px;color:var(--ink3);display:flex;align-items:center;gap:5px;}
+.breadcrumb a{color:var(--brand);}
+.prod-hero{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:start;padding:18px 0 22px;}
+.prod-img{width:110px;height:110px;background:var(--bg);border-radius:var(--rl);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:52px;flex-shrink:0;}
+.prod-meta h2{font-size:30px;font-weight:900;letter-spacing:-1px;margin-bottom:4px;}
+.code-pills{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.code-pill{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:2px 7px;font:600 10px 'Barlow Condensed',sans-serif;color:var(--ink2);}
+.prod-attrs{display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;}
+.prod-attr{font-size:11px;display:flex;align-items:center;gap:4px;}
+.prod-attr-l{color:var(--ink3);}
+.prod-attr-v{font-weight:600;}
+
+/* CONTENT NAV */
+.c-nav{display:flex;gap:3px;flex-wrap:wrap;background:#fff;padding:9px 20px;border-bottom:1px solid var(--border);}
+.c-tab{border:none;background:none;padding:6px 11px;border-radius:var(--r);font:600 12px 'Barlow',sans-serif;color:var(--ink3);transition:all .2s;display:flex;align-items:center;gap:4px;}
+.c-tab:hover{background:var(--bg);color:var(--ink);}
+.c-tab.active{background:var(--brand);color:#fff;}
+.c-tab .cnt{background:rgba(255,255,255,.3);border-radius:7px;padding:1px 5px;font-size:9px;}
+.c-tab:not(.active) .cnt{background:var(--bg);color:var(--ink3);}
+.c-area{padding:18px 20px;}
+.c-panel{display:none;}.c-panel.active{display:block;}
+.sec-lbl{font:600 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:1px;color:var(--ink3);margin-bottom:9px;display:flex;align-items:center;gap:7px;}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* SEARCH BAR IN PANEL */
+.panel-sb{display:flex;gap:7px;margin-bottom:14px;align-items:center;background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:10px 14px;}
+.panel-sb input{flex:1;border:1.5px solid var(--border);border-radius:var(--r);padding:7px 11px;font:400 13px 'Barlow',sans-serif;outline:none;background:var(--bg);}
+.panel-sb input:focus{border-color:var(--brand);background:#fff;}
+.panel-sb select{border:1.5px solid var(--border);border-radius:var(--r);padding:6px 9px;font:400 12px 'Barlow',sans-serif;background:var(--bg);outline:none;}
+.panel-sb .cnt-lbl{font-size:11px;color:var(--ink3);white-space:nowrap;padding:0 4px;}
+
+/* CONTENT ITEMS */
+.c-items{display:grid;gap:7px;margin-bottom:18px;}
+.c-item{background:#fff;border:1px solid var(--border);border-radius:var(--rl);padding:13px 16px;display:flex;gap:13px;align-items:flex-start;transition:all .2s;}
+.c-item:hover{border-color:var(--brand);box-shadow:var(--shsm);}
+.c-icon{width:38px;height:38px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.cib{background:#E6F0FA;} .cig{background:#E6F5EE;} .cio{background:#FFF3E0;}
+.cip{background:#F0E6FF;} .cigr{background:#F0F0F0;} .cir{background:#FFE6E6;}
+.c-body{flex:1;min-width:0;}
+.c-ttl{font-weight:600;font-size:13px;margin-bottom:2px;}
+.c-desc{font-size:11px;color:var(--ink3);margin-bottom:6px;line-height:1.4;}
+.c-meta{display:flex;gap:9px;flex-wrap:wrap;align-items:center;}
+.m-tag{font:500 10px 'Barlow',sans-serif;color:var(--ink3);}
+.m-tag span{font-weight:600;color:var(--ink2);}
+.c-act{display:flex;gap:5px;flex-shrink:0;}
+.inh{display:inline-flex;padding:2px 6px;border-radius:7px;font:600 9px 'Barlow',sans-serif;text-transform:uppercase;}
+.inh-p{background:#E6F0FA;color:#1A5A9A;} .inh-e{background:#E6F5EE;color:#1A7A4A;} .inh-f{background:#FFF3E0;color:#B05000;}
+
+/* DATA TABLES (params/alarms) */
+.dtbl-wrap{background:#fff;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-bottom:16px;}
+.dtbl{width:100%;border-collapse:collapse;font-size:12px;}
+.dtbl th{background:var(--bg);padding:8px 11px;text-align:left;font:600 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:.6px;color:var(--ink3);border-bottom:1px solid var(--border);}
+.dtbl td{padding:8px 11px;border-bottom:1px solid var(--bg);vertical-align:top;line-height:1.4;}
+.dtbl tr:last-child td{border-bottom:none;}
+.dtbl tr:hover td{background:#FAFAFA;}
+.p-code{font:700 11px 'Barlow Condensed',sans-serif;color:var(--brand);}
+.p-name{font-weight:600;}
+.p-def{font:700 11px 'Barlow Condensed',sans-serif;background:var(--bg);border-radius:3px;padding:1px 5px;}
+.al-code{font:800 11px 'Barlow Condensed',sans-serif;background:#FFE6E6;color:#B00000;border-radius:3px;padding:2px 6px;}
+.al-sol{font-size:10px;color:var(--ok);font-weight:500;margin-top:3px;}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:44px 20px;color:var(--ink3);}
+.empty-icon{font-size:36px;margin-bottom:10px;}
+.empty h3{font-size:16px;color:var(--ink2);margin-bottom:5px;}
+
+/* BUTTONS */
+.btn{padding:7px 14px;border-radius:var(--r);font:600 12px 'Barlow',sans-serif;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:4px;}
+.btn-p{background:var(--brand);color:#fff;} .btn-p:hover{background:var(--brandL);}
+.btn-s{background:var(--bg);color:var(--ink2);border:1px solid var(--border);} .btn-s:hover{border-color:var(--ink2);}
+.btn-g{background:#1D7A3A;color:#fff;} .btn-g:hover{background:#166031;}
+.btn-d{background:#FFE6E6;color:#B00000;border:1px solid #FFB0B0;} .btn-d:hover{background:#FFD0D0;}
+
+/* ADMIN */
+.admin-wrap{padding:20px;max-width:1160px;margin:0 auto;}
+.admin-layout{display:grid;grid-template-columns:190px 1fr;gap:18px;align-items:start;}
+.a-sidebar{background:#fff;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.a-sidebar-ttl{padding:10px 13px;font:700 10px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:1.2px;color:var(--ink3);border-bottom:1px solid var(--border);background:var(--bg);}
+.a-nav-btn{padding:9px 13px;border:none;background:none;width:100%;text-align:left;font:500 13px 'Barlow',sans-serif;color:var(--ink2);display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--bg);transition:all .15s;}
+.a-nav-btn:last-child{border-bottom:none;}
+.a-nav-btn:hover,.a-nav-btn.active{background:#FFF8F5;color:var(--brand);}
+.a-nav-btn.active{font-weight:600;}
+.a-content{background:#fff;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;}
+.a-panel{display:none;padding:18px;}.a-panel.active{display:block;}
+.a-ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.a-ph-ttl{font:800 19px 'Barlow Condensed',sans-serif;}
+.a-actions{display:flex;gap:7px;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;padding:18px;backdrop-filter:blur(2px);animation:fi .2s ease;}
+.modal{background:#fff;border-radius:var(--rl);width:100%;max-width:680px;box-shadow:var(--shlg);animation:su .22s ease;overflow:hidden;max-height:90vh;display:flex;flex-direction:column;}
+.modal.lg{max-width:860px;}
+.modal.sm{max-width:460px;}
+.m-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0;}
+.m-ttl{font:800 17px 'Barlow Condensed',sans-serif;}
+.m-x{background:none;border:none;font-size:18px;color:var(--ink3);padding:3px;border-radius:3px;}
+.m-x:hover{background:var(--border);}
+.m-body{padding:18px;overflow-y:auto;flex:1;}
+.m-foot{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:7px;justify-content:flex-end;background:var(--bg);flex-shrink:0;}
+
+/* WIZARD */
+.wiz-steps{display:flex;gap:0;margin-bottom:18px;background:var(--bg);border-radius:8px;padding:3px;}
+.wiz-step{flex:1;text-align:center;padding:6px 4px;border-radius:6px;transition:all .2s;}
+.wiz-step.act{background:#fff;box-shadow:var(--shsm);}
+.wiz-step-n{font:800 12px 'Barlow Condensed',sans-serif;color:var(--ink3);}
+.wiz-step.act .wiz-step-n{color:var(--brand);}
+.wiz-step.done .wiz-step-n{color:var(--ok);}
+.wiz-step-l{font:500 9px 'Barlow',sans-serif;color:var(--ink3);margin-top:1px;text-transform:uppercase;letter-spacing:.5px;}
+.wiz-step.act .wiz-step-l{color:var(--ink2);}
+.wiz-panel{display:none;}.wiz-panel.act{display:block;}
+
+/* TYPE GRID */
+.type-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.type-card{border:2px solid var(--border);border-radius:var(--r);padding:11px 7px;text-align:center;cursor:pointer;transition:all .2s;background:#fff;}
+.type-card:hover,.type-card.sel{border-color:var(--brand);background:#FFF8F5;}
+.type-card.sel{box-shadow:0 0 0 2px rgba(212,65,10,.2);}
+.type-card-ic{font-size:20px;margin-bottom:3px;}
+.type-card-l{font:700 10px 'Barlow Condensed',sans-serif;color:var(--ink2);}
+
+/* ASSOC OPTIONS */
+.assoc-opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;}
+.assoc-opt{border:2px solid var(--border);border-radius:var(--r);padding:13px 10px;cursor:pointer;transition:all .2s;background:#fff;}
+.assoc-opt:hover,.assoc-opt.sel{border-color:var(--brand);background:#FFF8F5;}
+.assoc-opt-ic{font-size:20px;margin-bottom:5px;}
+.assoc-opt-ttl{font:700 12px 'Barlow Condensed',sans-serif;color:var(--ink);margin-bottom:2px;}
+.assoc-opt-desc{font-size:10px;color:var(--ink3);line-height:1.3;}
+
+/* MULTI SELECT */
+.ms-wrap{border:1.5px solid var(--border);border-radius:var(--r);background:#fff;overflow:hidden;}
+.ms-search{padding:7px 9px;border-bottom:1px solid var(--border);}
+.ms-search input{width:100%;border:none;background:var(--bg);border-radius:3px;padding:5px 8px;font:400 12px 'Barlow',sans-serif;outline:none;}
+.ms-list{max-height:190px;overflow-y:auto;}
+.ms-item{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--bg);cursor:pointer;transition:background .15s;}
+.ms-item:last-child{border-bottom:none;}
+.ms-item:hover{background:#FAFAFA;}
+.ms-item.sel{background:#FFF8F5;}
+.ms-item input[type=checkbox]{width:13px;height:13px;accent-color:var(--brand);}
+.ms-item-name{font:600 12px 'Barlow',sans-serif;flex:1;}
+.ms-item-sub{font-size:10px;color:var(--ink3);}
+.ms-foot{font:500 10px 'Barlow',sans-serif;color:var(--ink3);padding:5px 10px;border-top:1px solid var(--border);background:var(--bg);}
+
+/* FORM */
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fg2 .fg{margin-bottom:0;}
+.f-label{font:600 10px 'Barlow',sans-serif;color:var(--ink2);text-transform:uppercase;letter-spacing:.5px;}
+.f-in,.f-sel,.f-ta{border:1.5px solid var(--border);border-radius:var(--r);padding:8px 10px;font:400 13px 'Barlow',sans-serif;color:var(--ink);background:var(--bg);outline:none;transition:border-color .2s;width:100%;}
+.f-in:focus,.f-sel:focus,.f-ta:focus{border-color:var(--brand);background:#fff;}
+.f-ta{resize:vertical;min-height:72px;}
+.f-hint{font-size:10px;color:var(--ink3);}
+
+/* PREVIEW BOX */
+.preview-box{background:#F0F7EE;border:2px solid #A8D5B5;border-radius:var(--rl);padding:13px 16px;margin-bottom:12px;}
+.preview-ttl{font:700 12px 'Barlow Condensed',sans-serif;color:var(--ok);margin-bottom:7px;}
+.preview-chips{display:flex;flex-wrap:wrap;gap:5px;}
+.prev-chip{background:#fff;border:1px solid #A8D5B5;border-radius:3px;padding:2px 8px;font:600 10px 'Barlow Condensed',sans-serif;}
+.prev-excl{background:#FFE6E6;border-color:#FFB0B0;text-decoration:line-through;color:#990000;}
+.preview-warn{background:#FFF3E0;border:1px solid #FFB74D;border-radius:var(--r);padding:9px 12px;font-size:11px;color:#7A4000;margin-top:8px;}
+
+/* EXCEL DROP */
+.xls-drop{border:2px dashed var(--border);border-radius:var(--rl);padding:32px 18px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg);}
+.xls-drop:hover,.xls-drop.drag{border-color:var(--brand);background:#FFF8F5;}
+.xls-drop-ic{font-size:34px;margin-bottom:8px;}
+.xls-drop-l{font:600 13px 'Barlow Condensed',sans-serif;color:var(--ink2);margin-bottom:3px;}
+.xls-drop-s{font-size:11px;color:var(--ink3);}
+.imp-prev{background:#fff;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;margin-top:12px;}
+.imp-prev-hdr{background:var(--bg);padding:8px 12px;font:600 11px 'Barlow',sans-serif;color:var(--ink2);border-bottom:1px solid var(--border);}
+.imp-tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.imp-tbl th{background:var(--bg);padding:6px 9px;text-align:left;font:600 9px 'Barlow',sans-serif;text-transform:uppercase;letter-spacing:.5px;color:var(--ink3);border-bottom:1px solid var(--border);}
+.imp-tbl td{padding:6px 9px;border-bottom:1px solid var(--bg);}
+.imp-tbl tr:last-child td{border-bottom:none;}
+.row-ok{background:#F0F7EE !important;}
+.row-warn{background:#FFF3E0 !important;}
+.row-err{background:#FFE6E6 !important;}
+.imp-stats{display:flex;gap:13px;padding:8px 12px;background:var(--bg);border-top:1px solid var(--border);font-size:11px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:18px;right:18px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:var(--r);font:500 13px 'Barlow',sans-serif;box-shadow:var(--shlg);z-index:2000;display:flex;align-items:center;gap:7px;animation:su .22s ease;}
+.toast.ok{background:var(--ok);} .toast.err{background:var(--err);}
+
+@keyframes fi{from{opacity:0}to{opacity:1}}
+@keyframes su{from{transform:translateY(14px);opacity:0}to{transform:translateY(0);opacity:1}}
+::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-track{background:transparent} ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+@media(max-width:768px){.prod-hero{grid-template-columns:1fr}.admin-layout{grid-template-columns:1fr}.type-grid{grid-template-columns:repeat(2,1fr)}.assoc-opts{grid-template-columns:1fr}.home-stats{grid-template-columns:repeat(2,1fr)}.fg2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo" onclick="goView('home')">
+    <div class="nav-logo-icon">EK</div>
+    <div><div class="nav-logo-name">EDILKAMIN</div><span class="nav-logo-sub">Portale Tecnico</span></div>
+  </div>
+  <div class="nav-links">
+    <button class="nb active" id="nb-home" onclick="goView('home')">🏠 Home</button>
+    <button class="nb" id="nb-products" onclick="goView('products')">📋 Prodotti</button>
+    <button class="nb" id="nb-docs" onclick="goView('docs')">📄 Documenti</button>
+  </div>
+  <div class="nav-right">
+    <button class="btn-admin" onclick="goView('admin')">⚙ Admin</button>
+  </div>
+</nav>
+
+<!-- HOME -->
+<div class="view active" id="view-home">
+  <div class="hero">
+    <div class="hero-badge">Documentazione Tecnica</div>
+    <h1>Tutto su ogni<br><span>prodotto Edilkamin.</span></h1>
+    <p>Parametri, allarmi, firmware, manuali, ricambi — logica di ereditarietà e esclusioni incluse.</p>
+    <div class="search-box">
+      <div class="s-tabs">
+        <button class="s-tab active" onclick="switchSTab('serial',this)">🔢 Matricola</button>
+        <button class="s-tab" onclick="switchSTab('name',this)">🔍 Nome</button>
+      </div>
+      <div id="sp-serial" class="s-panel show">
+        <div class="s-row">
+          <input class="s-in" id="serial-in" placeholder="Es: ASL05AIR, AKIKKA, SLIM…" onkeydown="if(event.key==='Enter')doSearch()">
+          <button class="s-btn" onclick="doSearch()">Cerca →</button>
+        </div>
+        <div class="s-hint">Matricola completa o codice prodotto</div>
+        <div id="serial-res"></div>
+      </div>
+      <div id="sp-name" class="s-panel">
+        <input class="s-in" id="name-in" placeholder="Es: Slim, Gora, Iris Plus…" oninput="renderChips(this.value)" style="width:100%;margin-bottom:9px">
+        <div class="chip-grid" id="chip-grid"></div>
+      </div>
+    </div>
+  </div>
+  <div class="home-stats">
+    <div class="stat"><span class="stat-n" id="st-prod">0</span><span class="stat-l">Prodotti</span></div>
+    <div class="stat"><span class="stat-n" id="st-elec">0</span><span class="stat-l">Elettroniche</span></div>
+    <div class="stat"><span class="stat-n" id="st-doc">0</span><span class="stat-l">Documenti</span></div>
+    <div class="stat"><span class="stat-n" id="st-par">0</span><span class="stat-l">Parametri</span></div>
+  </div>
+  <div class="elec-bar">
+    <div class="sec-hdr"><span class="sec-ttl">Elettroniche</span><span class="sec-sub">Contenuti ereditati da tutti i prodotti associati</span></div>
+    <div class="elec-cards" id="elec-cards"></div>
+  </div>
+</div>
+
+<!-- PRODUCTS -->
+<div class="view" id="view-products">
+  <div class="pw">
+    <div class="sec-hdr" style="margin-bottom:14px"><span class="sec-ttl">Prodotti</span><span class="sec-sub" id="prod-cnt"></span></div>
+    <div class="toolbar">
+      <input class="t-in" id="prod-srch" placeholder="🔍 Cerca…" oninput="renderProdsTable()">
+      <select class="t-sel" id="prod-f-elec" onchange="renderProdsTable()"><option value="">Tutte le elettroniche</option></select>
+      <select class="t-sel" id="prod-f-type" onchange="renderProdsTable()"><option value="">Tutti i tipi</option></select>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr><th>Prodotto</th><th>Tipo</th><th>Elettronica</th><th>Famiglia</th><th>Stato</th><th></th></tr></thead>
+    <tbody id="prod-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- PRODUCT DETAIL -->
+<div class="view" id="view-product">
+  <div style="max-width:1060px;margin:0 auto" id="prod-detail"></div>
+</div>
+
+<!-- DOCS -->
+<div class="view" id="view-docs">
+  <div class="pw">
+    <div class="sec-hdr" style="margin-bottom:14px"><span class="sec-ttl">Documenti</span><span class="sec-sub" id="docs-cnt"></span></div>
+    <div class="toolbar">
+      <input class="t-in" id="docs-srch" placeholder="🔍 Cerca…" oninput="renderDocsTable()">
+      <select class="t-sel" id="docs-f-type" onchange="renderDocsTable()"><option value="">Tutti i tipi</option>
+        <option value="documento">Documento</option><option value="circolare">Circolare</option>
+        <option value="firmware">Firmware</option><option value="ricambi">Ricambi</option>
+        <option value="video">Video</option><option value="wifi">Wi-Fi</option>
+      </select>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr><th>Titolo</th><th>Tipo</th><th>Livello</th><th>Associato a</th><th>Esclusi</th><th>Rev.</th><th></th></tr></thead>
+    <tbody id="docs-tbody"></tbody></table></div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="view" id="view-admin">
+  <div class="admin-wrap">
+    <div class="sec-hdr" style="margin-bottom:18px"><span class="sec-ttl">⚙ Admin</span><span class="sec-sub">Gestione prodotti, contenuti, allarmi e parametri</span></div>
+    <div class="admin-layout">
+      <div class="a-sidebar">
+        <div class="a-sidebar-ttl">Menu</div>
+        <button class="a-nav-btn active" onclick="aGo('products',this)">📦 Prodotti</button>
+        <button class="a-nav-btn" onclick="aGo('electronics',this)">🖥 Elettroniche</button>
+        <button class="a-nav-btn" onclick="aGo('families',this)">🏗 Famiglie</button>
+        <button class="a-nav-btn" onclick="aGo('contents',this)">📄 Contenuti</button>
+        <button class="a-nav-btn" onclick="aGo('params',this)">🔧 Parametri</button>
+        <button class="a-nav-btn" onclick="aGo('alarms',this)">⚠️ Allarmi</button>
+        <button class="a-nav-btn" onclick="aGo('firmware',this)">💾 Firmware</button>
+        <button class="a-nav-btn" onclick="aGo('serials',this)">🔢 Matricole</button>
+      </div>
+      <div class="a-content">
+        <div class="a-panel active" id="ap-products">
+          <div class="a-ph"><div class="a-ph-ttl">Prodotti</div>
+            <div class="a-actions">
+              <button class="btn btn-g" onclick="openXlsImport('products')">📊 Importa Excel</button>
+              <button class="btn btn-p" onclick="openProductModal(null)">+ Nuovo</button>
+            </div>
+          </div>
+          <div class="toolbar"><input class="t-in" id="ap-prod-srch" placeholder="🔍 Filtra…" oninput="renderAProd()">
+            <select class="t-sel" id="ap-prod-elec" onchange="renderAProd()"><option value="">Tutte le elettroniche</option></select>
+          </div>
+          <div id="ap-prod-list"></div>
+        </div>
+        <div class="a-panel" id="ap-electronics">
+          <div class="a-ph"><div class="a-ph-ttl">Elettroniche</div><button class="btn btn-p" onclick="openElecModal(null)">+ Nuova</button></div>
+          <div id="ap-elec-list"></div>
+        </div>
+        <div class="a-panel" id="ap-families">
+          <div class="a-ph"><div class="a-ph-ttl">Famiglie</div><button class="btn btn-p" onclick="openFamModal()">+ Nuova</button></div>
+          <div id="ap-fam-list"></div>
+        </div>
+        <div class="a-panel" id="ap-contents">
+          <div class="a-ph"><div class="a-ph-ttl">Contenuti</div><button class="btn btn-p" onclick="openContentWizard()">+ Nuovo (wizard)</button></div>
+          <div id="ap-cont-list"></div>
+        </div>
+        <div class="a-panel" id="ap-params">
+          <div class="a-ph"><div class="a-ph-ttl">Parametri</div>
+            <div class="a-actions">
+              <button class="btn btn-g" onclick="openXlsImport('params')">📊 Importa Excel</button>
+              <button class="btn btn-s" onclick="openDupModal('param')">⧉ Duplica</button>
+              <button class="btn btn-p" onclick="openParamModal(null)">+ Nuovo</button>
+            </div>
+          </div>
+          <div class="toolbar"><input class="t-in" id="ap-par-srch" placeholder="🔍 Filtra…" oninput="renderAParams()"></div>
+          <div id="ap-par-list"></div>
+        </div>
+        <div class="a-panel" id="ap-alarms">
+          <div class="a-ph"><div class="a-ph-ttl">Allarmi</div>
+            <div class="a-actions">
+              <button class="btn btn-g" onclick="openXlsImport('alarms')">📊 Importa Excel</button>
+              <button class="btn btn-s" onclick="openDupModal('alarm')">⧉ Duplica</button>
+              <button class="btn btn-p" onclick="openAlarmModal(null)">+ Nuovo</button>
+            </div>
+          </div>
+          <div class="toolbar"><input class="t-in" id="ap-al-srch" placeholder="🔍 Filtra…" oninput="renderAAlarms()"></div>
+          <div id="ap-al-list"></div>
+        </div>
+        <div class="a-panel" id="ap-firmware">
+          <div class="a-ph"><div class="a-ph-ttl">Firmware</div><button class="btn btn-p" onclick="openFwModal(null)">+ Nuovo</button></div>
+          <div id="ap-fw-list"></div>
+        </div>
+        <div class="a-panel" id="ap-serials">
+          <div class="a-ph"><div class="a-ph-ttl">Regole Matricola</div><button class="btn btn-p" onclick="openSerialModal(null)">+ Nuova</button></div>
+          <div id="ap-ser-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="overlay" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-box">
+    <div class="m-hdr"><span class="m-ttl" id="m-ttl"></span><button class="m-x" onclick="closeModal()">✕</button></div>
+    <div class="m-body" id="m-body"></div>
+    <div class="m-foot" id="m-foot"></div>
+  </div>
+</div>
+<div id="toast-el" class="toast" style="display:none"></div>
+
+<script>
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+const $ = id => document.getElementById(id);
+const toast = (msg, type='') => {
+  const t = $('toast-el');
+  t.textContent = msg; t.className = 'toast' + (type ? ' '+type : '');
+  t.style.display = 'flex';
+  setTimeout(() => { t.style.display = 'none'; }, 3000);
+};
+const uid = () => Math.random().toString(36).slice(2,9);
+const today = () => new Date().toISOString().split('T')[0];
+const getVal = id => { const el = $(id); return el ? el.value.trim() : ''; };
+
+// ══════════════════════════════════════
+// DATABASE
+// ══════════════════════════════════════
+const DB = {
+  electronics: [
+    {id:'e1',name:'The Mind',icon:'🧠',desc:'WiFi integrato, Bluetooth, gestione via APP CAT EK63. Display touch.'},
+    {id:'e2',name:'LX64 WiFi',icon:'📡',desc:'Scheda LX64 con modulo WiFi LAN1, firmware aggiornabile via USB.'},
+    {id:'e3',name:'EBM',icon:'⚡',desc:'Per camini a pellet con estrattore EBM, encoder e sensore di flusso.'},
+    {id:'e4',name:'Classica Plus',icon:'🔧',desc:'Base per stufe a pellet con radiocomando a tasti fisici.'},
+  ],
+  families: [
+    {id:'f1',name:'Stufe a Pellet'},{id:'f2',name:'Termostufe Idro'},
+    {id:'f3',name:'Camini a Pellet'},{id:'f4',name:'Caldaie Pellet'},
+  ],
+  productTypes: ['Stufa a pellet','Stufa a legna','Camino a legna','Inserto','Termostufa','Caldaia','Inserto idro'],
+  apps: [{id:'a1',name:'APP CAT EK63'},{id:'a2',name:'Edilkamin App'}],
+  products: [
+    {id:'p1',name:'Slim',emoji:'🔥',codes:['ASL05AIR.015','ASL05AIR.108','ASLIM'],type:'Stufa a pellet',elec:'e1',family:'f1',app:'a1',active:true,desc:'Stufa a pellet slim con The Mind, WiFi. 5 kW.'},
+    {id:'p2',name:'Iris Plus',emoji:'🌟',codes:['IRIS_PLUS_7_AA03_001','AIRIS'],type:'Stufa a pellet',elec:'e4',family:'f1',app:'a2',active:true,desc:'Stufa a pellet frontale 7 livelli.'},
+    {id:'p3',name:'Gora Slim',emoji:'🏔',codes:['AGORA','GORA_SLIM'],type:'Stufa a pellet',elec:'e1',family:'f1',app:'a1',active:true,desc:'Gora Slim con The Mind.'},
+    {id:'p4',name:'Gora 2 Slim Up',emoji:'🏔',codes:['AGORA2'],type:'Stufa a pellet',elec:'e1',family:'f1',app:'a1',active:true,desc:'Evoluzione Gora Slim display touch.'},
+    {id:'p5',name:'Aris Plus',emoji:'💨',codes:['AARISAAIR.022','AARIS'],type:'Stufa a pellet',elec:'e2',family:'f1',app:'a2',active:true,desc:'Con boiler opzionale e WiFi LX64.'},
+    {id:'p6',name:'Pellkamin 10 Evo',emoji:'🔆',codes:['PELLKAMIN_10_WIFI','APKAMIN'],type:'Inserto',elec:'e3',family:'f3',app:'a2',active:true,desc:'Camino a pellet da incasso EBM.'},
+    {id:'p7',name:'Kikka Plus',emoji:'🌿',codes:['KIKKAPLUS_AA03_001','AKIKKA'],type:'Stufa a pellet',elec:'e4',family:'f1',app:'a2',active:true,desc:'Stufa con sistema E-Brusher.'},
+    {id:'p8',name:'Maxima 24',emoji:'♨️',codes:['MAXIMA-24_V2.4','AMAXIMA'],type:'Termostufa',elec:'e2',family:'f2',app:'a2',active:true,desc:'Termostufa idro 24 kW, 10 livelli.'},
+    {id:'p9',name:'Nara Plus',emoji:'🌊',codes:['AARPLAAIR.022','ANARA'],type:'Stufa a pellet',elec:'e2',family:'f1',app:'a2',active:true,desc:'Nara Plus radiocomando touch.'},
+    {id:'p10',name:'Pellet-Blok',emoji:'🏗',codes:['PELLET_BLOK_V2015'],type:'Inserto',elec:'e2',family:'f3',app:'a2',active:false,desc:'Inserto a pellet 2rpm/3.3rpm.'},
+  ],
+  contents: [
+    {id:'c1',title:'Guida Wi-Fi The Mind',type:'wifi',level:'electronic',entity:'e1',excl:[],desc:'Procedura configurazione WiFi e Bluetooth per The Mind.',url:'#',rev:'v3.2',date:'2025-10-15',visible:true},
+    {id:'c2',title:'APP CAT EK63 Guida Tecnico',type:'documento',level:'electronic',entity:'e1',excl:[],desc:'Manuale operativo tecnici: collaudo a freddo, parametri nascosti.',url:'#',rev:'v2.0',date:'2025-08-20',visible:true},
+    {id:'c3',title:'Manuale Utente Slim',type:'documento',level:'product',entity:'p1',excl:[],desc:'Manuale installazione, uso e manutenzione Slim.',url:'#',rev:'v2.3',date:'2025-11-05',visible:true},
+    {id:'c4',title:'Guida WiFi LX64',type:'wifi',level:'electronic',entity:'e2',excl:['p10'],desc:'Configurazione WiFi LX64WR (escluso Pellet-Blok).',url:'#',rev:'v1.8',date:'2025-09-01',visible:true},
+    {id:'c5',title:'Ricambi Aris Plus',type:'ricambi',level:'product',entity:'p5',excl:[],desc:'Catalogo ricambi con codici e schemi esplosi.',url:'#',rev:'v1.0',date:'2025-06-15',visible:true},
+    {id:'c6',title:'Circolare Tecnica Stufe Pellet 2025',type:'circolare',level:'family',entity:'f1',excl:[],desc:'Circolare tecnica valida per tutta la gamma stufe a pellet.',url:'#',rev:'v1.0',date:'2025-12-01',visible:true},
+    {id:'c7',title:'Video Pulizia Kikka Plus',type:'video',level:'product',entity:'p7',excl:[],desc:'Video guida: procedura pulizia crogiolo.',url:'https://youtube.com',rev:'v1',date:'2025-03-10',visible:true},
+    {id:'c8',title:'Circolare WiFi The Mind (no Gora)',type:'circolare',level:'electronic',entity:'e1',excl:['p3'],desc:'Aggiornamento WiFi The Mind. NON applicare a Gora Slim.',url:'#',rev:'v2.1',date:'2026-01-10',visible:true},
+  ],
+  params: [
+    {id:'pa1',code:'AC',name:'Carico Pellet Accensione',desc:'% pellet prima fase accensione',range:'0–100',unit:'%',def:'20',notes:'Aumentare se pellet bassa qualità.',level:'product',entity:'p1',excl:[]},
+    {id:'pa2',code:'AR',name:'Carico Pellet Riscaldamento',desc:'% pellet seconda fase accensione',range:'0–100',unit:'%',def:'35',notes:'',level:'product',entity:'p1',excl:[]},
+    {id:'pa3',code:'P1',name:'Carico Pellet P1',desc:'Carico pellet potenza minima',range:'0–100',unit:'%',def:'40',notes:'',level:'product',entity:'p1',excl:[]},
+    {id:'pa4',code:'P5',name:'Carico Pellet P5',desc:'Carico pellet potenza massima',range:'0–100',unit:'%',def:'80',notes:'',level:'product',entity:'p1',excl:[]},
+    {id:'pa5',code:'T67',name:'Counter Pulizia',desc:'Ore funzionamento prima del messaggio Pulizia',range:'0–999',unit:'h',def:'24',notes:'',level:'product',entity:'p1',excl:[]},
+    {id:'pa6',code:'BT',name:'Unpair Bluetooth',desc:'Azzera associazione BT. Solo a stufa spenta.',range:'ON/OFF',unit:'',def:'OFF',notes:'DA NON ATTIVARE IN FUNZIONE.',level:'electronic',entity:'e1',excl:[]},
+    {id:'pa7',code:'WIFI',name:'Configurazione WiFi',desc:'Attivare 60s poi scansionare con app.',range:'ON/OFF',unit:'',def:'OFF',notes:'',level:'electronic',entity:'e1',excl:[]},
+    {id:'pa8',code:'AK',name:'Airkare',desc:'Abilita funzione Airkare qualità aria.',range:'ON/OFF',unit:'',def:'OFF',notes:'',level:'electronic',entity:'e1',excl:[]},
+    {id:'pa9',code:'H2O',name:'Temp. Max Acqua',desc:'T° acqua oltre la quale va in Over temp H2O.',range:'60–90',unit:'°C',def:'78',notes:'',level:'product',entity:'p8',excl:[]},
+    {id:'pa10',code:'P10',name:'Carico Pellet P10',desc:'Carico pellet potenza massima 10 livelli',range:'0–100',unit:'%',def:'85',notes:'',level:'product',entity:'p8',excl:[]},
+    {id:'pa11',code:'MANU',name:'Counter Manutenzione',desc:'Kg pellet per avviso Manutenzione CAT',range:'0–9999',unit:'Kg',def:'1500',notes:'',level:'family',entity:'f1',excl:[]},
+  ],
+  alarms: [
+    {id:'al1',code:'H1',title:'No Depression',desc:'Sensore flusso sotto la soglia.',cause:'Tiraggio insufficiente, estrattore guasto.',solution:'Verificare canna fumaria. Controllare estrattore.',notes:'Disabilitare temp. con tasto Meno.',priority:'Alta',level:'family',entity:'f1',excl:[]},
+    {id:'al2',code:'H2',title:'No Start / Start Failed',desc:'Fiamma non rilevata entro il tempo max.',cause:'Pellet assente, candeletta guasta.',solution:'Verificare pellet. Controllare candeletta.',notes:'',priority:'Alta',level:'family',entity:'f1',excl:[]},
+    {id:'al3',code:'H7',title:'Over Temp Fumi',desc:'Temperatura fumi supera la soglia.',cause:'Canna ostruita, potenza alta.',solution:'Pulire stufa e canna. Abbassare potenza.',notes:'Soglia default 280°C.',priority:'Alta',level:'family',entity:'f1',excl:[]},
+    {id:'al4',code:'H5',title:'Blackout',desc:'Interruzione alimentazione durante funzionamento.',cause:'Mancanza corrente.',solution:'Normale. Riaccensione auto se BLACKOUT=ON.',notes:'',priority:'Bassa',level:'family',entity:'f1',excl:[]},
+    {id:'al5',code:'H8',title:'Over Temp H2O',desc:'Temperatura acqua superiore al parametro.',cause:'Circolatore guasto, pressione bassa.',solution:'Verificare circolatore e impianto idraulico.',notes:'Solo termostufe idro.',priority:'Alta',level:'family',entity:'f2',excl:[]},
+    {id:'al6',code:'AL11',title:'Stop Fiamma',desc:'T° fumi scesa sotto la soglia minima.',cause:'Pellet bassa qualità, crogiolo sporco.',solution:'Verificare qualità pellet. Pulire crogiolo.',notes:'',priority:'Media',level:'electronic',entity:'e3',excl:[]},
+  ],
+  firmware: [
+    {id:'fw1',name:'THE MIND SERVICE',version:'USB MAX 8GB',date:'2026-01-15',notes:'Fix AIRKARE, miglioramento BLE, parametri autoregolazione.',level:'electronic',entity:'e1',excl:[]},
+    {id:'fw2',name:'SLIM WiFi LAN1',version:'LX64WR_12_1_108',date:'2025-01-04',notes:'Miglioramento stabilità WiFi e parametri via APP.',level:'product',entity:'p1',excl:[]},
+    {id:'fw3',name:'MAXIMA 24',version:'V2.4',date:'2025-10-12',notes:'Gestione allarme portello. Nuovo parametro anti-legionella.',level:'product',entity:'p8',excl:[]},
+  ],
+  serials: [
+    {id:'s1',pattern:'ASL05AIR',prod:'p1',pri:1},{id:'s2',pattern:'ASL',prod:'p1',pri:2},
+    {id:'s3',pattern:'AGORA2',prod:'p4',pri:1},{id:'s4',pattern:'AGORA',prod:'p3',pri:2},
+    {id:'s5',pattern:'AIRIS',prod:'p2',pri:1},{id:'s6',pattern:'AARIS',prod:'p5',pri:1},
+    {id:'s7',pattern:'AARPL',prod:'p5',pri:1},{id:'s8',pattern:'APKAMIN',prod:'p6',pri:1},
+    {id:'s9',pattern:'AKIKKA',prod:'p7',pri:1},{id:'s10',pattern:'AMAXIMA',prod:'p8',pri:1},
+    {id:'s11',pattern:'ANARA',prod:'p9',pri:1},{id:'s12',pattern:'SLIM',prod:'p1',pri:10},
+  ],
+};
+
+// ══════════════════════════════════════
+// DB HELPERS
+// ══════════════════════════════════════
+const getElec = id => DB.electronics.find(e => e.id === id) || null;
+const getFamily = id => DB.families.find(f => f.id === id) || null;
+const getApp = id => DB.apps.find(a => a.id === id) || null;
+const getProduct = id => DB.products.find(p => p.id === id) || null;
+
+// Inheritance logic with exclusions
+const getContents = p => DB.contents.filter(c => c.visible && (
+  (c.level==='product' && c.entity===p.id) ||
+  (c.level==='electronic' && c.entity===p.elec && !c.excl.includes(p.id)) ||
+  (c.level==='family' && c.entity===p.family && !c.excl.includes(p.id))
+)).sort((a,b) => ({product:0,electronic:1,family:2}[a.level] - {product:0,electronic:1,family:2}[b.level]));
+
+const getParams = p => DB.params.filter(pa => (
+  (pa.level==='product' && pa.entity===p.id) ||
+  (pa.level==='electronic' && pa.entity===p.elec && !pa.excl.includes(p.id)) ||
+  (pa.level==='family' && pa.entity===p.family && !pa.excl.includes(p.id))
+)).sort((a,b) => ({product:0,electronic:1,family:2}[a.level] - {product:0,electronic:1,family:2}[b.level]));
+
+const getAlarms = p => DB.alarms.filter(al => (
+  (al.level==='product' && al.entity===p.id) ||
+  (al.level==='electronic' && al.entity===p.elec && !al.excl.includes(p.id)) ||
+  (al.level==='family' && al.entity===p.family && !al.excl.includes(p.id))
+)).sort((a,b) => ({product:0,electronic:1,family:2}[a.level] - {product:0,electronic:1,family:2}[b.level]));
+
+const getFw = p => DB.firmware.filter(fw => (
+  (fw.level==='product' && fw.entity===p.id) ||
+  (fw.level==='electronic' && fw.entity===p.elec && !(fw.excl||[]).includes(p.id))
+)).sort((a,b) => ({product:0,electronic:1,family:2}[a.level] - {product:0,electronic:1,family:2}[b.level]));
+
+const getAffected = (level, entity, excl) => {
+  if(level==='product') return DB.products.filter(p=>p.id===entity&&p.active);
+  if(level==='electronic') return DB.products.filter(p=>p.elec===entity&&p.active&&!excl.includes(p.id));
+  if(level==='family') return DB.products.filter(p=>p.family===entity&&p.active&&!excl.includes(p.id));
+  return [];
+};
+
+// ══════════════════════════════════════
+// ROUTING
+// ══════════════════════════════════════
+let curProd = null;
+
+function goView(name) {
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const el = $('view-'+name); if(el) el.classList.add('active');
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  const nb = $('nb-'+name); if(nb) nb.classList.add('active');
+  if(name==='products') { renderProdsTable(); fillProdFilters(); }
+  if(name==='docs') renderDocsTable();
+  if(name==='admin') renderAllAdmin();
+}
+
+// ══════════════════════════════════════
+// HOME
+// ══════════════════════════════════════
+function initHome() {
+  $('st-prod').textContent = DB.products.filter(p=>p.active).length;
+  $('st-elec').textContent = DB.electronics.length;
+  $('st-doc').textContent = DB.contents.length;
+  $('st-par').textContent = DB.params.length;
+  $('elec-cards').innerHTML = DB.electronics.map(e => {
+    const n = DB.products.filter(p=>p.elec===e.id&&p.active).length;
+    return `<div class="elec-card" onclick="goView('products');setTimeout(()=>{$('prod-f-elec').value='${e.id}';renderProdsTable();},50)">
+      <div style="font-size:24px;margin-bottom:7px">${e.icon}</div>
+      <div style="font:700 14px 'Barlow Condensed',sans-serif;margin-bottom:2px">${e.name}</div>
+      <div style="font-size:10px;color:var(--ink3);margin-bottom:9px;line-height:1.4">${e.desc}</div>
+      <div style="font:600 11px 'Barlow',sans-serif;color:var(--brand)">↗ ${n} prodotti</div>
+    </div>`;
+  }).join('');
+  renderChips('');
+}
+function switchSTab(tab, btn) {
+  document.querySelectorAll('.s-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  $('sp-serial').classList.toggle('show', tab==='serial');
+  $('sp-name').classList.toggle('show', tab==='name');
+}
+function renderChips(q) {
+  const prods = DB.products.filter(p=>p.active&&(!q||p.name.toLowerCase().includes(q.toLowerCase())||p.codes.some(c=>c.toLowerCase().includes(q.toLowerCase()))));
+  $('chip-grid').innerHTML = prods.map(p=>`<div class="chip" onclick="openProduct('${p.id}')"><span style="font-size:18px">${p.emoji}</span><span class="chip-name">${p.name}</span><span class="chip-sub">${getElec(p.elec)?.name||''}</span></div>`).join('');
+}
+function doSearch() {
+  const raw = $('serial-in').value.trim().toUpperCase();
+  const res = $('serial-res');
+  if(!raw) { res.innerHTML=''; return; }
+  const rules = [...DB.serials].sort((a,b)=>a.pri-b.pri);
+  let found = null;
+  for(const r of rules) { if(raw.includes(r.pattern.toUpperCase())||raw.startsWith(r.pattern.toUpperCase())) { found=getProduct(r.prod); break; } }
+  if(!found) found = DB.products.find(p=>p.codes.some(c=>c.toUpperCase().includes(raw)||raw.includes(c.toUpperCase())));
+  if(found) res.innerHTML=`<div class="result-box" onclick="openProduct('${found.id}')"><span style="font-size:34px">${found.emoji}</span><div style="flex:1"><strong style="font:800 19px 'Barlow Condensed',sans-serif">${found.name}</strong><div style="font-size:11px;color:var(--ink3);margin-top:2px">${found.codes[0]} | ${getElec(found.elec)?.name||'—'}</div></div><span style="font-size:20px;color:var(--brand)">→</span></div>`;
+  else res.innerHTML=`<div class="result-nf">⚠ Nessun prodotto trovato per "<strong>${raw}</strong>".</div>`;
+}
+
+// ══════════════════════════════════════
+// PRODUCTS TABLE
+// ══════════════════════════════════════
+function fillProdFilters() {
+  ['prod-f-elec','ap-prod-elec'].forEach(id=>{
+    const sel=$(id); if(!sel||sel.children.length>1) return;
+    DB.electronics.forEach(e=>{ const o=document.createElement('option'); o.value=e.id; o.textContent=e.name; sel.appendChild(o); });
+  });
+  const tf=$('prod-f-type'); if(tf&&tf.children.length<2) DB.productTypes.forEach(t=>{ const o=document.createElement('option'); o.value=t; o.textContent=t; tf.appendChild(o); });
+}
+function renderProdsTable() {
+  const q=(getVal('prod-srch')).toLowerCase();
+  const ef=getVal('prod-f-elec'), tf=getVal('prod-f-type');
+  const prods=DB.products.filter(p=>(!q||p.name.toLowerCase().includes(q)||p.codes.some(c=>c.toLowerCase().includes(q)))&&(!ef||p.elec===ef)&&(!tf||p.type===tf));
+  $('prod-cnt').textContent=prods.length+' prodotti';
+  $('prod-tbody').innerHTML=prods.map(p=>`<tr onclick="openProduct('${p.id}')">
+    <td><div class="p-name-cell"><div class="p-avatar">${p.emoji}</div><div class="p-name-txt"><strong>${p.name}</strong><span>${p.codes[0]}</span></div></div></td>
+    <td><span class="badge bp">${p.type}</span></td>
+    <td><span class="badge bb">${getElec(p.elec)?.name||'—'}</span></td>
+    <td><span class="badge bgr">${getFamily(p.family)?.name||'—'}</span></td>
+    <td><span class="badge ${p.active?'bg':'bgr'}">${p.active?'Attivo':'Inattivo'}</span></td>
+    <td><button class="alink" onclick="event.stopPropagation();openProduct('${p.id}')">Apri →</button></td>
+  </tr>`).join('');
+}
+
+// ══════════════════════════════════════
+// PRODUCT PAGE
+// ══════════════════════════════════════
+function openProduct(id) {
+  curProd = getProduct(id);
+  if(!curProd) return;
+  renderProductPage();
+  goView('product');
+}
+function renderProductPage() {
+  const p = curProd;
+  const elec=getElec(p.elec), fam=getFamily(p.family), app=getApp(p.app);
+  const allC=getContents(p), pars=getParams(p), als=getAlarms(p), fws=getFw(p);
+  const tabs=[
+    {k:'params',ic:'🔧',lbl:'Parametri',cnt:pars.length},
+    {k:'alarms',ic:'⚠️',lbl:'Allarmi',cnt:als.length},
+    {k:'firmware',ic:'💾',lbl:'Firmware',cnt:fws.length},
+    {k:'docs',ic:'📄',lbl:'Documenti',cnt:allC.filter(c=>c.type==='documento').length},
+    {k:'ricambi',ic:'🔩',lbl:'Ricambi',cnt:allC.filter(c=>c.type==='ricambi').length},
+    {k:'video',ic:'🎬',lbl:'Video',cnt:allC.filter(c=>c.type==='video').length},
+    {k:'wifi',ic:'📡',lbl:'Wi-Fi',cnt:allC.filter(c=>c.type==='wifi').length},
+    {k:'circ',ic:'📮',lbl:'Circolari',cnt:allC.filter(c=>c.type==='circolare').length},
+    {k:'elec',ic:'🖥',lbl:'Elettronica',cnt:1},
+  ];
+  $('prod-detail').innerHTML=`
+    <div class="prod-header">
+      <div class="breadcrumb"><a onclick="goView('home')" style="cursor:pointer">Home</a> › <a onclick="goView('products')" style="cursor:pointer">Prodotti</a> › <span>${p.name}</span></div>
+      <div class="prod-hero">
+        <div class="prod-img">${p.emoji}</div>
+        <div class="prod-meta">
+          <h2>${p.name}</h2>
+          <div class="code-pills">${p.codes.map(c=>`<span class="code-pill">${c}</span>`).join('')}</div>
+          <div style="margin-bottom:7px"><span class="badge bp">${p.type}</span> <span class="badge ${p.active?'bg':'bgr'}" style="margin-left:3px">${p.active?'Attivo':'Inattivo'}</span></div>
+          <div class="prod-attrs">
+            <div class="prod-attr"><span class="prod-attr-l">Elettronica:</span><span class="prod-attr-v">${elec?.name||'—'} ${elec?.icon||''}</span></div>
+            <div class="prod-attr"><span class="prod-attr-l">Famiglia:</span><span class="prod-attr-v">${fam?.name||'—'}</span></div>
+            ${app?`<div class="prod-attr"><span class="prod-attr-l">App:</span><span class="prod-attr-v">${app.name}</span></div>`:''}
+          </div>
+          <div style="margin-top:9px;font-size:12px;color:var(--ink2)">${p.desc}</div>
+        </div>
+      </div>
+    </div>
+    <div class="c-nav">${tabs.map((t,i)=>`<button class="c-tab ${i===0?'active':''}" id="ctab-${t.k}" onclick="switchCTab('${t.k}',this)">${t.ic} ${t.lbl}<span class="cnt">${t.cnt}</span></button>`).join('')}</div>
+    <div class="c-area">
+      <div class="c-panel active" id="cpanel-params">${renderParamsPanel(p,pars)}</div>
+      <div class="c-panel" id="cpanel-alarms">${renderAlarmsPanel(p,als)}</div>
+      <div class="c-panel" id="cpanel-firmware">${renderFwPanel(p,fws)}</div>
+      <div class="c-panel" id="cpanel-docs">${renderGenericPanel('documento',allC)}</div>
+      <div class="c-panel" id="cpanel-ricambi">${renderGenericPanel('ricambi',allC)}</div>
+      <div class="c-panel" id="cpanel-video">${renderGenericPanel('video',allC)}</div>
+      <div class="c-panel" id="cpanel-wifi">${renderGenericPanel('wifi',allC)}</div>
+      <div class="c-panel" id="cpanel-circ">${renderGenericPanel('circolare',allC)}</div>
+      <div class="c-panel" id="cpanel-elec">${renderElecPanel(p,elec)}</div>
+    </div>`;
+}
+function switchCTab(k, btn) {
+  document.querySelectorAll('.c-tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+  document.querySelectorAll('.c-panel').forEach(p=>p.classList.remove('active'));
+  $('cpanel-'+k).classList.add('active');
+}
+
+// ── PARAMS PANEL ──
+function renderParamsPanel(p, pars) {
+  if(!pars.length) return emptyState('🔧','Nessun parametro','Nessun parametro configurato.');
+  const pid = 'prm-'+p.id;
+  return `<div class="panel-sb">
+    <input id="${pid}-s" placeholder="🔍 Cerca codice, nome, descrizione…" oninput="filterParams('${pid}')">
+    <select id="${pid}-l" onchange="filterParams('${pid}')">
+      <option value="">Tutti i livelli</option>
+      <option value="product">Prodotto</option><option value="electronic">Elettronica</option><option value="family">Famiglia</option>
+    </select>
+    <span class="cnt-lbl" id="${pid}-cnt">${pars.length} parametri</span>
+  </div>
+  <div class="dtbl-wrap"><table class="dtbl" id="${pid}-tbl">
+    <thead><tr><th>Codice</th><th>Nome</th><th>Descrizione</th><th>Range</th><th>U.M.</th><th>Default</th><th>Livello</th><th>Note</th></tr></thead>
+    <tbody>${pars.map(pa=>`<tr data-lev="${pa.level}" data-s="${(pa.code+' '+pa.name+' '+pa.desc).toLowerCase()}">
+      <td class="p-code">${pa.code}</td>
+      <td class="p-name">${pa.name}</td>
+      <td style="font-size:11px;color:var(--ink2);max-width:180px">${pa.desc}</td>
+      <td style="font-family:monospace;font-size:11px">${pa.range}</td>
+      <td style="font-size:10px;color:var(--ink3)">${pa.unit}</td>
+      <td><span class="p-def">${pa.def}</span></td>
+      <td><span class="inh ${pa.level==='product'?'inh-p':pa.level==='electronic'?'inh-e':'inh-f'}">${pa.level==='product'?'Prod.':pa.level==='electronic'?'Elec.':'Fam.'}</span></td>
+      <td style="font-size:10px;color:var(--ink3)">${pa.notes||'—'}</td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+function filterParams(pid) {
+  const q = ($(`${pid}-s`)?.value||'').toLowerCase();
+  const lev = $(`${pid}-l`)?.value||'';
+  const rows = document.querySelectorAll(`#${pid}-tbl tbody tr`);
+  let shown=0;
+  rows.forEach(r=>{ const show=(!q||r.dataset.s.includes(q))&&(!lev||r.dataset.lev===lev); r.style.display=show?'':'none'; if(show)shown++; });
+  const cnt=$(`${pid}-cnt`); if(cnt) cnt.textContent=shown+' parametri';
+}
+
+// ── ALARMS PANEL ──
+function renderAlarmsPanel(p, als) {
+  if(!als.length) return emptyState('✅','Nessun allarme','Nessun allarme configurato.');
+  const pid = 'al-'+p.id;
+  return `<div class="panel-sb">
+    <input id="${pid}-s" placeholder="🔍 Cerca codice, titolo, causa, soluzione…" oninput="filterAlarms('${pid}')">
+    <select id="${pid}-p" onchange="filterAlarms('${pid}')">
+      <option value="">Tutte le priorità</option>
+      <option value="Alta">Alta</option><option value="Media">Media</option><option value="Bassa">Bassa</option>
+    </select>
+    <select id="${pid}-l" onchange="filterAlarms('${pid}')">
+      <option value="">Tutti i livelli</option>
+      <option value="product">Prodotto</option><option value="electronic">Elettronica</option><option value="family">Famiglia</option>
+    </select>
+    <span class="cnt-lbl" id="${pid}-cnt">${als.length} allarmi</span>
+  </div>
+  <div id="${pid}-list">${renderAlarmItems(als)}</div>`;
+}
+function renderAlarmItems(als) {
+  if(!als.length) return `<div class="empty"><div class="empty-icon">🔍</div><h3>Nessun risultato</h3><p>Prova altri termini.</p></div>`;
+  return `<div style="display:grid;gap:7px">${als.map(al=>`
+    <div class="c-item" style="cursor:default">
+      <div style="flex-shrink:0">
+        <span class="al-code">${al.code}</span>
+        <div style="margin-top:4px"><span class="badge ${al.priority==='Alta'?'br':al.priority==='Media'?'bo':'bgr'}" style="font-size:9px">${al.priority}</span></div>
+      </div>
+      <div class="c-body">
+        <div class="c-ttl">${al.title}</div>
+        <div class="c-desc">${al.desc}</div>
+        ${al.cause?`<div style="font-size:11px;color:var(--ink2);margin-bottom:2px">⚡ <strong>Causa:</strong> ${al.cause}</div>`:''}
+        <div class="al-sol">✓ ${al.solution}</div>
+        ${al.notes?`<div style="font-size:10px;color:var(--ink3);margin-top:2px">📝 ${al.notes}</div>`:''}
+        <div class="c-meta" style="margin-top:5px"><span class="inh ${al.level==='product'?'inh-p':al.level==='electronic'?'inh-e':'inh-f'}">${al.level==='product'?'Prod.':al.level==='electronic'?'Elec.':'Fam.'}</span></div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+function filterAlarms(pid) {
+  if(!curProd) return;
+  const q=($(`${pid}-s`)?.value||'').toLowerCase();
+  const pri=$(`${pid}-p`)?.value||'';
+  const lev=$(`${pid}-l`)?.value||'';
+  const all=getAlarms(curProd);
+  const filtered=all.filter(al=>{
+    const txt=(al.code+' '+al.title+' '+al.cause+' '+al.solution+' '+al.desc).toLowerCase();
+    return(!q||txt.includes(q))&&(!pri||al.priority===pri)&&(!lev||al.level===lev);
+  });
+  const cnt=$(`${pid}-cnt`); if(cnt) cnt.textContent=filtered.length+' allarmi';
+  const list=$(`${pid}-list`); if(list) list.innerHTML=renderAlarmItems(filtered);
+}
+
+// ── FIRMWARE PANEL ──
+function renderFwPanel(p, fws) {
+  if(!fws.length) return emptyState('💾','Nessun firmware','Nessun firmware disponibile.');
+  return `<div style="display:grid;gap:9px">${fws.map(fw=>`
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--rl);overflow:hidden">
+      <div style="background:var(--ink);color:#fff;padding:11px 16px;display:flex;align-items:center;justify-content:space-between">
+        <span style="font:700 13px 'Barlow Condensed',sans-serif">💾 ${fw.name}</span>
+        <span style="font:700 11px monospace;background:rgba(255,255,255,.15);padding:2px 7px;border-radius:3px">${fw.version}</span>
+      </div>
+      <div style="padding:12px 16px">
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:8px;font-size:11px;color:var(--ink3)">
+          <span>Data: <strong>${fw.date}</strong></span>
+          <span class="inh ${fw.level==='product'?'inh-p':'inh-e'}">${fw.level==='product'?'Prodotto':'Elettronica'}</span>
+        </div>
+        <div style="font-size:11px;color:var(--ink2);background:var(--bg);padding:9px;border-radius:var(--r)">${fw.notes}</div>
+        <div style="margin-top:9px"><button class="btn btn-p">↓ Scarica</button></div>
+      </div>
+    </div>`).join('')}</div>`;
+}
+
+// ── GENERIC PANEL ──
+function renderGenericPanel(type, allC) {
+  const items=allC.filter(c=>c.type===type);
+  if(!items.length) return emptyState('📭','Nessun contenuto','Nessun documento di questa categoria.');
+  const ic={documento:'📄',ricambi:'🔩',video:'🎬',wifi:'📡',circolare:'📮',firmware:'💾'};
+  const bg={documento:'cib',ricambi:'cio',video:'cip',wifi:'cig',circolare:'cigr'};
+  const byL={product:items.filter(c=>c.level==='product'),electronic:items.filter(c=>c.level==='electronic'),family:items.filter(c=>c.level==='family')};
+  let html='';
+  [['product','Specifici del prodotto','inh-p'],['electronic','Ereditati dall\'elettronica','inh-e'],['family','Ereditati dalla famiglia','inh-f']].forEach(([lvl,lbl,cls])=>{
+    const grp=byL[lvl]; if(!grp.length) return;
+    html+=`<div class="sec-lbl">${lbl}</div><div class="c-items">${grp.map(c=>`
+      <div class="c-item">
+        <div class="c-icon ${bg[c.type]||'cigr'}">${ic[c.type]||'📄'}</div>
+        <div class="c-body">
+          <div class="c-ttl">${c.title}</div>
+          <div class="c-desc">${c.desc}</div>
+          <div class="c-meta"><div class="m-tag">Rev: <span>${c.rev}</span></div><span class="inh ${cls}">${lvl==='product'?'Prodotto':lvl==='electronic'?'Elettronica':'Famiglia'}</span></div>
+        </div>
+        <div class="c-act"><a class="btn btn-p" href="${c.url}" target="_blank">↓ Apri</a></div>
+      </div>`).join('')}</div>`;
+  });
+  return html;
+}
+
+// ── ELEC PANEL ──
+function renderElecPanel(p, elec) {
+  if(!elec) return emptyState('🖥','Nessuna elettronica','Nessuna elettronica associata.');
+  const others=DB.products.filter(pr=>pr.elec===p.elec&&pr.id!==p.id&&pr.active);
+  return `<div class="c-item" style="cursor:default">
+    <div class="c-icon cib" style="font-size:26px">${elec.icon}</div>
+    <div class="c-body">
+      <div class="c-ttl" style="font-size:15px">${elec.name}</div>
+      <div class="c-desc" style="font-size:12px">${elec.desc}</div>
+      ${others.length?`<div class="c-meta" style="margin-top:7px"><span style="font-size:10px;color:var(--ink3)">Altri prodotti:</span> ${others.map(pr=>`<span class="badge bb" onclick="openProduct('${pr.id}')" style="cursor:pointer">${pr.emoji} ${pr.name}</span>`).join('')}</div>`:''}
+    </div>
+  </div>`;
+}
+function emptyState(ic,ttl,desc){return`<div class="empty"><div class="empty-icon">${ic}</div><h3>${ttl}</h3><p>${desc}</p></div>`;}
+
+// ══════════════════════════════════════
+// DOCS TABLE
+// ══════════════════════════════════════
+function renderDocsTable() {
+  const q=(getVal('docs-srch')).toLowerCase();
+  const type=getVal('docs-f-type');
+  const all=[...DB.contents,...DB.firmware.map(f=>({...f,type:'firmware',url:'#',rev:f.version,visible:true}))];
+  const items=all.filter(c=>(!q||c.title.toLowerCase().includes(q)||(c.desc||'').toLowerCase().includes(q))&&(!type||c.type===type));
+  $('docs-cnt').textContent=items.length+' documenti';
+  const tic={documento:'📄',firmware:'💾',ricambi:'🔩',video:'🎬',wifi:'📡',circolare:'📮'};
+  $('docs-tbody').innerHTML=items.map(c=>{
+    const en=c.level==='product'?getProduct(c.entity)?.name:c.level==='electronic'?getElec(c.entity)?.name:getFamily(c.entity)?.name;
+    return`<tr>
+      <td><strong>${c.title}</strong><br><span style="font-size:10px;color:var(--ink3)">${(c.desc||'').substring(0,50)}…</span></td>
+      <td>${tic[c.type]||'📄'} <span class="badge bgr" style="text-transform:capitalize">${c.type}</span></td>
+      <td><span class="inh ${c.level==='product'?'inh-p':c.level==='electronic'?'inh-e':'inh-f'}">${c.level}</span></td>
+      <td style="font-size:11px">${en||'—'}</td>
+      <td>${(c.excl||[]).length?`<span style="display:inline-flex;padding:2px 6px;border-radius:7px;font:600 9px 'Barlow',sans-serif;background:#FFF3E0;color:#B05000">−${c.excl.length}</span>`:'—'}</td>
+      <td style="font-size:10px;color:var(--ink3)">${c.rev||c.version||'—'}</td>
+      <td><a class="btn btn-p" href="${c.url||'#'}" target="_blank" style="font-size:11px;padding:5px 10px">↓</a></td>
+    </tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// MODAL ENGINE
+// ══════════════════════════════════════
+function openModal(title, body, foot, size='') {
+  $('m-ttl').textContent=title;
+  $('m-body').innerHTML=body;
+  $('m-foot').innerHTML=foot;
+  $('modal-box').className='modal'+(size?' '+size:'');
+  $('modal-overlay').style.display='flex';
+}
+function closeModal(){$('modal-overlay').style.display='none';}
+
+// ══════════════════════════════════════
+// ADMIN — RENDER ALL
+// ══════════════════════════════════════
+function aGo(name, btn) {
+  document.querySelectorAll('.a-panel').forEach(p=>p.classList.remove('active'));
+  $('ap-'+name).classList.add('active');
+  document.querySelectorAll('.a-nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+function renderAllAdmin() {
+  fillProdFilters();
+  renderAProd(); renderAElec(); renderAFam(); renderACont();
+  renderAParams(); renderAAlarms(); renderAFw(); renderASerials();
+}
+
+// ── ADMIN PRODUCTS ──
+function renderAProd() {
+  const q=(getVal('ap-prod-srch')).toLowerCase();
+  const ef=getVal('ap-prod-elec');
+  const prods=DB.products.filter(p=>(!q||p.name.toLowerCase().includes(q)||p.codes[0].toLowerCase().includes(q))&&(!ef||p.elec===ef));
+  $('ap-prod-list').innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Prodotto</th><th>Tipo</th><th>Codice</th><th>Elettronica</th><th>Stato</th><th>Azioni</th></tr></thead>
+  <tbody>${prods.map(p=>`<tr>
+    <td><strong>${p.emoji} ${p.name}</strong></td>
+    <td><span class="badge bp">${p.type}</span></td>
+    <td style="font-size:11px;font-family:monospace">${p.codes[0]}</td>
+    <td><span class="badge bb">${getElec(p.elec)?.name||'—'}</span></td>
+    <td><span class="badge ${p.active?'bg':'bgr'}">${p.active?'Attivo':'Inattivo'}</span></td>
+    <td><button class="alink" onclick="openProductModal('${p.id}')">✏</button> &nbsp;
+        <button class="alink" style="color:var(--ink3)" onclick="toggleProd('${p.id}')">${p.active?'Disattiva':'Attiva'}</button></td>
+  </tr>`).join('')}</tbody></table></div>`;
+}
+function toggleProd(id){const p=getProduct(id);if(p){p.active=!p.active;renderAProd();initHome();toast(p.name+' '+(p.active?'attivato':'disattivato'),'ok');}}
+
+// ── ADMIN ELEC ──
+function renderAElec(){
+  $('ap-elec-list').innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Nome</th><th>Descrizione</th><th>Prodotti</th><th>Azioni</th></tr></thead>
+  <tbody>${DB.electronics.map(e=>`<tr><td><strong>${e.icon} ${e.name}</strong></td><td style="font-size:11px;color:var(--ink2)">${e.desc}</td><td>${DB.products.filter(p=>p.elec===e.id).length}</td><td><button class="alink" onclick="openElecModal('${e.id}')">✏</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+// ── ADMIN FAMILIES ──
+function renderAFam(){
+  $('ap-fam-list').innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Nome</th></tr></thead>
+  <tbody>${DB.families.map(f=>`<tr><td><strong>${f.name}</strong></td></tr>`).join('')}</tbody></table></div>`;
+}
+// ── ADMIN CONTENTS ──
+function renderACont(){
+  $('ap-cont-list').innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Titolo</th><th>Tipo</th><th>Livello</th><th>Esclusi</th><th>Prodotti visibili</th></tr></thead>
+  <tbody>${DB.contents.map(c=>{
+    const aff=getAffected(c.level,c.entity,c.excl).length;
+    return`<tr><td><strong>${c.title}</strong></td><td style="font-size:11px;text-transform:capitalize">${c.type}</td>
+    <td><span class="inh ${c.level==='product'?'inh-p':c.level==='electronic'?'inh-e':'inh-f'}">${c.level}</span></td>
+    <td>${c.excl.length?`<span style="font:600 10px 'Barlow',sans-serif;background:#FFF3E0;color:#B05000;padding:2px 6px;border-radius:7px">−${c.excl.length}</span>`:'—'}</td>
+    <td style="font-weight:600;color:var(--brand)">${aff}</td></tr>`;}).join('')}</tbody></table></div>`;
+}
+// ── ADMIN PARAMS ──
+function renderAParams(){
+  const q=(getVal('ap-par-srch')).toLowerCase();
+  const pars=DB.params.filter(pa=>!q||pa.code.toLowerCase().includes(q)||pa.name.toLowerCase().includes(q));
+  $('ap-par-list').innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Codice</th><th>Nome</th><th>Default</th><th>Range</th><th>Livello</th><th>Entità</th><th>Esclusi</th></tr></thead>
+  <tbody>${pars.map(pa=>{
+    const en=pa.level==='product'?getProduct(pa.entity)?.name:pa.level==='electronic'?getElec(pa.entity)?.name:getFamily(pa.entity)?.name;
+    return`<tr><td class="p-code">${pa.code}</td><td class="p-name">${pa.name}</td><td><span class="p-def">${pa.def}</span></td>
+    <td style="font-family:monospace;font-size:11px">${pa.range}</td>
+    <td><span class="inh ${pa.level==='product'?'inh-p':pa.level==='electronic'?'inh-e':'inh-f'}">${pa.level}</span></td>
+    <td style="font-size:11px">${en||'—'}</td>
+    <td>${pa.excl.length?`<span style="font:600 10px 'Barlow',sans-serif;background:#FFF3E0;color:#B05000;padding:2px 6px;border-radius:7px">−${pa.excl.length}</span>`:'—'}</td></tr>`;}).join('')}</tbody></table></div>`;
+}
+// ── ADMIN ALARMS ──
+function renderAAlarms(){
+  const q=(getVal('ap-al-srch')).toLowerCase();
+  const als=DB.alarms.filter(al=>!q||al.code.toLowerCase().includes(q)||al.title.toLowerCase().includes(q));
+  $('ap-al-list').innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Codice</th><th>Titolo</th><th>Priorità</th><th>Livello</th><th>Entità</th><th>Esclusi</th></tr></thead>
+  <tbody>${als.map(al=>{
+    const en=al.level==='product'?getProduct(al.entity)?.name:al.level==='electronic'?getElec(al.entity)?.name:getFamily(al.entity)?.name;
+    return`<tr><td><span class="al-code">${al.code}</span></td><td class="p-name">${al.title}</td>
+    <td><span class="badge ${al.priority==='Alta'?'br':al.priority==='Media'?'bo':'bgr'}">${al.priority}</span></td>
+    <td><span class="inh ${al.level==='product'?'inh-p':al.level==='electronic'?'inh-e':'inh-f'}">${al.level}</span></td>
+    <td style="font-size:11px">${en||'—'}</td>
+    <td>${al.excl.length?`<span style="font:600 10px 'Barlow',sans-serif;background:#FFF3E0;color:#B05000;padding:2px 6px;border-radius:7px">−${al.excl.length}</span>`:'—'}</td></tr>`;}).join('')}</tbody></table></div>`;
+}
+// ── ADMIN FIRMWARE ──
+function renderAFw(){
+  $('ap-fw-list').innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Nome</th><th>Versione</th><th>Livello</th><th>Entità</th><th>Data</th></tr></thead>
+  <tbody>${DB.firmware.map(fw=>{const en=fw.level==='product'?getProduct(fw.entity)?.name:getElec(fw.entity)?.name;return`<tr><td><strong>${fw.name}</strong></td><td style="font-family:monospace;font-size:11px">${fw.version}</td><td><span class="inh ${fw.level==='product'?'inh-p':'inh-e'}">${fw.level}</span></td><td style="font-size:11px">${en||'—'}</td><td style="font-size:11px">${fw.date}</td></tr>`;}).join('')}</tbody></table></div>`;
+}
+// ── ADMIN SERIALS ──
+function renderASerials(){
+  $('ap-ser-list').innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Pattern</th><th>Prodotto</th><th>Priorità</th></tr></thead>
+  <tbody>${[...DB.serials].sort((a,b)=>a.pri-b.pri).map(r=>`<tr><td style="font-family:monospace;font-weight:700">${r.pattern}</td><td>${getProduct(r.prod)?.name||'—'}</td><td>${r.pri}</td></tr>`).join('')}</tbody></table></div>`;
+}
+
+// ══════════════════════════════════════
+// PRODUCT MODAL
+// ══════════════════════════════════════
+function openProductModal(id) {
+  const p = id ? getProduct(id) : null;
+  const existSerial = id ? DB.serials.find(r=>r.prod===id)?.pattern||'' : '';
+  openModal(p?'Modifica Prodotto':'Nuovo Prodotto', `
+    <div class="fg2">
+      <div class="fg"><label class="f-label">Nome *</label><input class="f-in" id="pm-name" value="${p?.name||''}" placeholder="es. Slim"></div>
+      <div class="fg"><label class="f-label">Emoji</label><input class="f-in" id="pm-emoji" value="${p?.emoji||'🔥'}"></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Codici (separati da virgola)</label><input class="f-in" id="pm-codes" value="${p?.codes?.join(', ')||''}" placeholder="ASL05AIR, ASLIM…"></div>
+      <div class="fg"><label class="f-label">Tipo</label><select class="f-sel" id="pm-type">${DB.productTypes.map(t=>`<option ${p?.type===t?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="fg"><label class="f-label">Elettronica</label><select class="f-sel" id="pm-elec"><option value="">— Nessuna —</option>${DB.electronics.map(e=>`<option value="${e.id}" ${p?.elec===e.id?'selected':''}>${e.name}</option>`).join('')}</select></div>
+      <div class="fg"><label class="f-label">Famiglia</label><select class="f-sel" id="pm-fam"><option value="">— Nessuna —</option>${DB.families.map(f=>`<option value="${f.id}" ${p?.family===f.id?'selected':''}>${f.name}</option>`).join('')}</select></div>
+      <div class="fg"><label class="f-label">App</label><select class="f-sel" id="pm-app"><option value="">— Nessuna —</option>${DB.apps.map(a=>`<option value="${a.id}" ${p?.app===a.id?'selected':''}>${a.name}</option>`).join('')}</select></div>
+      <div class="fg"><label class="f-label">Prefisso matricola</label><input class="f-in" id="pm-serial" value="${existSerial}" placeholder="es. ASL05AIR"></div>
+      <div class="fg"><label class="f-label">Stato</label><select class="f-sel" id="pm-active"><option value="1" ${p?.active!==false?'selected':''}>Attivo</option><option value="0" ${p?.active===false?'selected':''}>Inattivo</option></select></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Descrizione</label><textarea class="f-ta" id="pm-desc">${p?.desc||''}</textarea></div>
+    </div>`,
+    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveProduct('${id||''}')">✓ Salva</button>`
+  );
+}
+function saveProduct(id) {
+  const name=getVal('pm-name'); if(!name){toast('Nome obbligatorio','err');return;}
+  const serial=getVal('pm-serial');
+  const data={name,emoji:getVal('pm-emoji')||'🔥',codes:getVal('pm-codes').split(',').map(c=>c.trim()).filter(Boolean)||[name],type:$('pm-type').value,elec:$('pm-elec').value,family:$('pm-fam').value,app:$('pm-app').value,active:$('pm-active').value==='1',desc:getVal('pm-desc')};
+  if(id) { const p=getProduct(id); if(p) Object.assign(p,data); }
+  else { const nid='p'+uid(); data.id=nid; DB.products.push(data); if(serial) DB.serials.push({id:'s'+uid(),pattern:serial,prod:nid,pri:5}); }
+  closeModal(); renderAllAdmin(); initHome(); toast('✓ Prodotto salvato','ok');
+}
+
+// ══════════════════════════════════════
+// ELEC MODAL
+// ══════════════════════════════════════
+function openElecModal(id) {
+  const e = id ? getElec(id) : null;
+  openModal(e?'Modifica Elettronica':'Nuova Elettronica', `
+    <div class="fg2">
+      <div class="fg"><label class="f-label">Nome *</label><input class="f-in" id="em-name" value="${e?.name||''}" placeholder="es. The Mind"></div>
+      <div class="fg"><label class="f-label">Icona</label><input class="f-in" id="em-icon" value="${e?.icon||'🖥'}"></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Descrizione</label><textarea class="f-ta" id="em-desc">${e?.desc||''}</textarea></div>
+    </div>`,
+    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveElec('${id||''}')">✓ Salva</button>`,'sm'
+  );
+}
+function saveElec(id) {
+  const name=getVal('em-name'); if(!name){toast('Nome obbligatorio','err');return;}
+  const data={name,icon:getVal('em-icon')||'🖥',desc:getVal('em-desc')};
+  if(id){const e=getElec(id);if(e)Object.assign(e,data);}
+  else DB.electronics.push({id:'e'+uid(),...data});
+  closeModal(); renderAllAdmin(); initHome(); toast('✓ Salvato','ok');
+}
+
+// ══════════════════════════════════════
+// FAM MODAL
+// ══════════════════════════════════════
+function openFamModal() {
+  openModal('Nuova Famiglia', `<div class="fg"><label class="f-label">Nome *</label><input class="f-in" id="fm-name" placeholder="es. Stufe a Pellet"></div>`,
+    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveFam()">✓ Salva</button>`,'sm');
+}
+function saveFam(){const n=getVal('fm-name');if(!n){toast('Nome obbligatorio','err');return;}DB.families.push({id:'f'+uid(),name:n});closeModal();renderAllAdmin();toast('✓ Salvato','ok');}
+
+// ══════════════════════════════════════
+// SERIAL MODAL
+// ══════════════════════════════════════
+function openSerialModal(id) {
+  const r=id?DB.serials.find(s=>s.id===id):null;
+  openModal('Regola Matricola',`
+    <div class="fg2">
+      <div class="fg"><label class="f-label">Pattern *</label><input class="f-in" id="sr-pattern" value="${r?.pattern||''}" placeholder="es. ASL05AIR"></div>
+      <div class="fg"><label class="f-label">Priorità</label><input class="f-in" id="sr-pri" type="number" value="${r?.pri||5}" min="1" max="100"></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Prodotto</label><select class="f-sel" id="sr-prod"><option value="">—</option>${DB.products.map(p=>`<option value="${p.id}" ${r?.prod===p.id?'selected':''}>${p.emoji} ${p.name}</option>`).join('')}</select></div>
+    </div>`,
+    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveSerial('${id||''}')">✓ Salva</button>`,'sm');
+}
+function saveSerial(id){const pat=getVal('sr-pattern');if(!pat){toast('Pattern obbligatorio','err');return;}const prod=$('sr-prod').value;if(!prod){toast('Seleziona prodotto','err');return;}if(id){const r=DB.serials.find(s=>s.id===id);if(r){r.pattern=pat;r.prod=prod;r.pri=parseInt($('sr-pri').value)||5;}}else DB.serials.push({id:'s'+uid(),pattern:pat,prod,pri:parseInt($('sr-pri').value)||5});closeModal();renderASerials();toast('✓ Salvato','ok');}
+
+// ══════════════════════════════════════
+// ALARM MODAL
+// ══════════════════════════════════════
+function openAlarmModal(id) {
+  const al=id?DB.alarms.find(a=>a.id===id):null;
+  openModal(al?'Modifica Allarme':'Nuovo Allarme',`
+    <div class="fg2">
+      <div class="fg"><label class="f-label">Codice *</label><input class="f-in" id="alm-code" value="${al?.code||''}" placeholder="H1"></div>
+      <div class="fg"><label class="f-label">Priorità</label><select class="f-sel" id="alm-pri">${['Alta','Media','Bassa'].map(p=>`<option ${al?.priority===p?'selected':''}>${p}</option>`).join('')}</select></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Titolo *</label><input class="f-in" id="alm-title" value="${al?.title||''}" placeholder="Titolo allarme"></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Descrizione</label><textarea class="f-ta" id="alm-desc">${al?.desc||''}</textarea></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Causa</label><textarea class="f-ta" id="alm-cause">${al?.cause||''}</textarea></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Soluzione</label><textarea class="f-ta" id="alm-sol">${al?.solution||''}</textarea></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Note tecniche</label><textarea class="f-ta" id="alm-notes">${al?.notes||''}</textarea></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+      <p style="font:600 10px 'Barlow',sans-serif;color:var(--ink2);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px">Associazione</p>
+      <div class="fg2">
+        <div class="fg"><label class="f-label">Livello</label><select class="f-sel" id="alm-level" onchange="updateEntitySel('alm')">
+          <option value="product">Prodotto</option><option value="electronic">Elettronica</option><option value="family">Famiglia</option>
+        </select></div>
+        <div class="fg"><label class="f-label">Entità</label><select class="f-sel" id="alm-entity">${DB.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
+      </div>
+    </div>`,
+    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveAlarm('${id||''}')">✓ Salva</button>`,'lg');
+  if(al){$('alm-level').value=al.level;updateEntitySel('alm');$('alm-entity').value=al.entity;}
+}
+function updateEntitySel(pfx) {
+  const lev=$(`${pfx}-level`)?.value;
+  const sel=$(`${pfx}-entity`); if(!sel) return;
+  if(lev==='product') sel.innerHTML=DB.products.map(p=>`<option value="${p.id}">${p.emoji} ${p.name}</option>`).join('');
+  else if(lev==='electronic') sel.innerHTML=DB.electronics.map(e=>`<option value="${e.id}">${e.icon} ${e.name}</option>`).join('');
+  else sel.innerHTML=DB.families.map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
+}
+function saveAlarm(id){
+  const code=getVal('alm-code'),title=getVal('alm-title');
+  if(!code||!title){toast('Codice e titolo obbligatori','err');return;}
+  const data={code,title,desc:getVal('alm-desc'),cause:getVal('alm-cause'),solution:getVal('alm-sol'),notes:getVal('alm-notes'),priority:$('alm-pri').value,level:$('alm-level').value,entity:$('alm-entity').value,excl:[]};
+  if(id){const al=DB.alarms.find(a=>a.id===id);if(al)Object.assign(al,data);}
+  else DB.alarms.push({id:'al'+uid(),...data});
+  closeModal(); renderAAlarms(); toast('✓ Allarme salvato','ok');
+}
+
+// ══════════════════════════════════════
+// PARAM MODAL
+// ══════════════════════════════════════
+function openParamModal(id) {
+  const pa=id?DB.params.find(p=>p.id===id):null;
+  openModal(pa?'Modifica Parametro':'Nuovo Parametro',`
+    <div class="fg2">
+      <div class="fg"><label class="f-label">Codice *</label><input class="f-in" id="prm-code" value="${pa?.code||''}" placeholder="P1"></div>
+      <div class="fg"><label class="f-label">Nome *</label><input class="f-in" id="prm-name" value="${pa?.name||''}" placeholder="Nome parametro"></div>
+      <div class="fg"><label class="f-label">Range</label><input class="f-in" id="prm-range" value="${pa?.range||''}" placeholder="0–100"></div>
+      <div class="fg"><label class="f-label">Unità misura</label><input class="f-in" id="prm-unit" value="${pa?.unit||''}" placeholder="%"></div>
+      <div class="fg"><label class="f-label">Valore default</label><input class="f-in" id="prm-def" value="${pa?.def||''}" placeholder="50"></div>
+      <div class="fg"></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Descrizione</label><textarea class="f-ta" id="prm-desc">${pa?.desc||''}</textarea></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Note tecniche</label><textarea class="f-ta" id="prm-notes">${pa?.notes||''}</textarea></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px">
+      <p style="font:600 10px 'Barlow',sans-serif;color:var(--ink2);margin-bottom:9px;text-transform:uppercase;letter-spacing:.5px">Associazione</p>
+      <div class="fg2">
+        <div class="fg"><label class="f-label">Livello</label><select class="f-sel" id="prm-level" onchange="updateEntitySel('prm')">
+          <option value="product">Prodotto</option><option value="electronic">Elettronica</option><option value="family">Famiglia</option>
+        </select></div>
+        <div class="fg"><label class="f-label">Entità</label><select class="f-sel" id="prm-entity">${DB.products.map(p=>`<option value="${p.id}">${p.name}</option>`).join('')}</select></div>
+      </div>
+    </div>`,
+    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveParam('${id||''}')">✓ Salva</button>`,'lg');
+  if(pa){$('prm-level').value=pa.level;updateEntitySel('prm');$('prm-entity').value=pa.entity;}
+}
+function saveParam(id){
+  const code=getVal('prm-code'),name=getVal('prm-name');
+  if(!code||!name){toast('Codice e nome obbligatori','err');return;}
+  const data={code,name,desc:getVal('prm-desc'),range:getVal('prm-range'),unit:getVal('prm-unit'),def:getVal('prm-def'),notes:getVal('prm-notes'),level:$('prm-level').value,entity:$('prm-entity').value,excl:[]};
+  if(id){const pa=DB.params.find(p=>p.id===id);if(pa)Object.assign(pa,data);}
+  else DB.params.push({id:'pa'+uid(),...data});
+  closeModal(); renderAParams(); toast('✓ Parametro salvato','ok');
+}
+
+// ══════════════════════════════════════
+// FIRMWARE MODAL
+// ══════════════════════════════════════
+function openFwModal(id) {
+  const fw=id?DB.firmware.find(f=>f.id===id):null;
+  openModal(fw?'Modifica Firmware':'Nuovo Firmware',`
+    <div class="fg2">
+      <div class="fg"><label class="f-label">Nome *</label><input class="f-in" id="fw-name" value="${fw?.name||''}" placeholder="es. Slim WiFi"></div>
+      <div class="fg"><label class="f-label">Versione</label><input class="f-in" id="fw-ver" value="${fw?.version||''}" placeholder="v1.0"></div>
+      <div class="fg"><label class="f-label">Livello</label><select class="f-sel" id="fw-level" onchange="updateEntitySel('fw')"><option value="product" ${fw?.level==='product'?'selected':''}>Prodotto</option><option value="electronic" ${fw?.level==='electronic'?'selected':''}>Elettronica</option></select></div>
+      <div class="fg"><label class="f-label">Entità</label><select class="f-sel" id="fw-entity">${DB.products.map(p=>`<option value="${p.id}" ${fw?.entity===p.id?'selected':''}>${p.name}</option>`).join('')}</select></div>
+      <div class="fg"><label class="f-label">Data</label><input class="f-in" id="fw-date" type="date" value="${fw?.date||today()}"></div>
+      <div class="fg"></div>
+      <div class="fg" style="grid-column:span 2"><label class="f-label">Note / Changelog</label><textarea class="f-ta" id="fw-notes">${fw?.notes||''}</textarea></div>
+    </div>`,
+    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="saveFw('${id||''}')">✓ Salva</button>`);
+  if(fw){$('fw-level').value=fw.level;updateEntitySel('fw');$('fw-entity').value=fw.entity;}
+}
+function saveFw(id){
+  const name=getVal('fw-name');if(!name){toast('Nome obbligatorio','err');return;}
+  const data={name,version:getVal('fw-ver'),date:getVal('fw-date')||today(),notes:getVal('fw-notes'),level:$('fw-level').value,entity:$('fw-entity').value,excl:[]};
+  if(id){const fw=DB.firmware.find(f=>f.id===id);if(fw)Object.assign(fw,data);}
+  else DB.firmware.push({id:'fw'+uid(),...data});
+  closeModal(); renderAFw(); toast('✓ Firmware salvato','ok');
+}
+
+// ══════════════════════════════════════
+// CONTENT WIZARD (6 steps)
+// ══════════════════════════════════════
+const WIZ = {step:1,type:'',assoc:'',entity:'',excl:[],selProds:[],title:'',desc:'',url:'',rev:''};
+const WIZ_LABELS=['Tipo','Associazione','Selezione','Esclusioni','Dettagli','Anteprima'];
+
+function openContentWizard() {
+  Object.assign(WIZ,{step:1,type:'',assoc:'',entity:'',excl:[],selProds:[],title:'',desc:'',url:'',rev:''});
+  renderWizard();
+}
+function renderWizard() {
+  const steps=WIZ_LABELS.map((l,i)=>`<div class="wiz-step ${i+1===WIZ.step?'act':i+1<WIZ.step?'done':''}"><div class="wiz-step-n">${i+1<WIZ.step?'✓':(i+1)}</div><div class="wiz-step-l">${l}</div></div>`).join('');
+  openModal('Carica contenuto — Passo '+WIZ.step+' di '+WIZ_LABELS.length,
+    `<div class="wiz-steps">${steps}</div><div id="wiz-body">${getWizPanel()}</div>`,
+    `${WIZ.step>1?'<button class="btn btn-s" onclick="wizNav(-1)">← Indietro</button>':'<button class="btn btn-s" onclick="closeModal()">Annulla</button>'}
+     ${WIZ.step<6?'<button class="btn btn-p" onclick="wizNav(1)">Avanti →</button>':'<button class="btn btn-p" onclick="saveContent()">✓ Salva</button>'}`, 'lg');
+}
+function getWizPanel() {
+  const s=WIZ.step;
+  if(s===1) return `<p style="font-size:13px;color:var(--ink2);margin-bottom:14px">Che tipo di contenuto vuoi caricare?</p>
+    <div class="type-grid">${[{k:'documento',ic:'📄',l:'Documento'},{k:'circolare',ic:'📮',l:'Circolare'},{k:'video',ic:'🎬',l:'Video'},{k:'wifi',ic:'📡',l:'Wi-Fi'},{k:'ricambi',ic:'🔩',l:'Ricambi'},{k:'firmware',ic:'💾',l:'Firmware'}].map(t=>`<div class="type-card ${WIZ.type===t.k?'sel':''}" onclick="WIZ.type='${t.k}';document.querySelectorAll('.type-card').forEach(c=>c.classList.remove('sel'));this.classList.add('sel')"><div class="type-card-ic">${t.ic}</div><div class="type-card-l">${t.l}</div></div>`).join('')}</div>`;
+  if(s===2) return `<p style="font-size:13px;color:var(--ink2);margin-bottom:14px">Come vuoi associare il contenuto?</p>
+    <div class="assoc-opts">
+      <div class="assoc-opt ${WIZ.assoc==='product'?'sel':''}" onclick="WIZ.assoc='product';document.querySelectorAll('.assoc-opt').forEach(o=>o.classList.remove('sel'));this.classList.add('sel')"><div class="assoc-opt-ic">📦</div><div class="assoc-opt-ttl">Prodotti specifici</div><div class="assoc-opt-desc">Selezione manuale uno o più prodotti.</div></div>
+      <div class="assoc-opt ${WIZ.assoc==='electronic'?'sel':''}" onclick="WIZ.assoc='electronic';document.querySelectorAll('.assoc-opt').forEach(o=>o.classList.remove('sel'));this.classList.add('sel')"><div class="assoc-opt-ic">🖥</div><div class="assoc-opt-ttl">Intera elettronica</div><div class="assoc-opt-desc">Tutti i prodotti con una certa elettronica.</div></div>
+      <div class="assoc-opt ${WIZ.assoc==='electronic_excl'?'sel':''}" onclick="WIZ.assoc='electronic_excl';document.querySelectorAll('.assoc-opt').forEach(o=>o.classList.remove('sel'));this.classList.add('sel')"><div class="assoc-opt-ic">🖥⛔</div><div class="assoc-opt-ttl">Elettronica + esclusioni</div><div class="assoc-opt-desc">Tutti i prodotti dell'elettronica tranne alcuni.</div></div>
+    </div>`;
+  if(s===3) {
+    if(WIZ.assoc==='product') return `<p style="font-size:13px;color:var(--ink2);margin-bottom:10px">Seleziona i prodotti:</p>${renderMS('wiz-ms-prod',WIZ.selProds,DB.products.filter(p=>p.active))}`;
+    return `<div class="fg"><label class="f-label">Elettronica</label><select class="f-sel" id="wiz-elec-sel" onchange="WIZ.entity=this.value"><option value="">— Seleziona —</option>${DB.electronics.map(e=>`<option value="${e.id}" ${WIZ.entity===e.id?'selected':''}>${e.icon} ${e.name} (${DB.products.filter(p=>p.elec===e.id&&p.active).length} prodotti)</option>`).join('')}</select></div>
+    ${WIZ.entity?`<div style="background:var(--bg);border-radius:var(--r);padding:9px;font-size:12px">Prodotti: ${DB.products.filter(p=>p.elec===WIZ.entity&&p.active).map(p=>`<strong>${p.name}</strong>`).join(', ')}</div>`:''}`;
+  }
+  if(s===4) {
+    if(WIZ.assoc!=='electronic_excl') return `<div style="text-align:center;padding:28px"><div style="font-size:34px;margin-bottom:10px">✅</div><p style="font-size:13px;color:var(--ink2)">Nessuna esclusione necessaria.</p></div>`;
+    const ep=DB.products.filter(p=>p.elec===WIZ.entity&&p.active);
+    return `<p style="font-size:13px;color:var(--ink2);margin-bottom:10px">Prodotti da <strong>ESCLUDERE</strong>:</p>${renderMS('wiz-ms-excl',WIZ.excl,ep,true)}${WIZ.excl.length?`<div style="background:#FFF3E0;border:1px solid #FFB74D;border-radius:var(--r);padding:9px 12px;font-size:11px;margin-top:8px;color:#7A4000">⛔ Esclusi: ${WIZ.excl.map(id=>getProduct(id)?.name).join(', ')}</div>`:''}`;
+  }
+  if(s===5) return `<div class="fg2">
+    <div class="fg"><label class="f-label">Titolo *</label><input class="f-in" id="wiz-title" value="${WIZ.title}" placeholder="Titolo documento" oninput="WIZ.title=this.value"></div>
+    <div class="fg"><label class="f-label">Revisione</label><input class="f-in" id="wiz-rev" value="${WIZ.rev}" placeholder="v1.0" oninput="WIZ.rev=this.value"></div>
+    <div class="fg" style="grid-column:span 2"><label class="f-label">Descrizione</label><textarea class="f-ta" id="wiz-desc" oninput="WIZ.desc=this.value">${WIZ.desc}</textarea></div>
+    <div class="fg" style="grid-column:span 2"><label class="f-label">URL / Link file</label><input class="f-in" id="wiz-url" value="${WIZ.url}" placeholder="https://…" oninput="WIZ.url=this.value"></div>
+  </div>`;
+  if(s===6) {
+    const affected = WIZ.assoc==='product'
+      ? WIZ.selProds.map(id=>getProduct(id)).filter(Boolean)
+      : getAffected(WIZ.assoc==='electronic_excl'?'electronic':WIZ.assoc, WIZ.entity, WIZ.excl);
+    const exclNames=WIZ.excl.map(id=>getProduct(id)?.name).filter(Boolean);
+    return `<div class="preview-box">
+      <div class="preview-ttl">✅ Visibile su ${affected.length} prodotti:</div>
+      <div class="preview-chips">${affected.map(p=>`<span class="prev-chip">${p.emoji} ${p.name}</span>`).join('')}${exclNames.map(n=>`<span class="prev-chip prev-excl">⛔ ${n}</span>`).join('')}</div>
+      ${!affected.length?'<div class="preview-warn">⚠ Nessun prodotto associato! Torna indietro.</div>':''}
+    </div>
+    <table style="width:100%;font-size:12px;border-collapse:collapse;margin-top:4px">
+      <tr><td style="padding:4px 0;color:var(--ink3)">Tipo:</td><td><strong>${WIZ.type}</strong></td></tr>
+      <tr><td style="padding:4px 0;color:var(--ink3)">Titolo:</td><td><strong>${WIZ.title||'(non inserito)'}</strong></td></tr>
+      <tr><td style="padding:4px 0;color:var(--ink3)">Modalità:</td><td>${WIZ.assoc==='product'?'Prodotti specifici':WIZ.assoc==='electronic'?'Intera elettronica':'Elettronica con esclusioni'}</td></tr>
+      <tr><td style="padding:4px 0;color:var(--ink3)">Revisione:</td><td>${WIZ.rev||'—'}</td></tr>
+    </table>`;
+  }
+  return '';
+}
+function wizNav(dir) {
+  if(WIZ.step===1 && dir>0 && !WIZ.type){toast('Seleziona un tipo','err');return;}
+  if(WIZ.step===2 && dir>0 && !WIZ.assoc){toast('Seleziona la modalità','err');return;}
+  if(WIZ.step===3 && dir>0) {
+    if(WIZ.assoc==='product'){WIZ.selProds=getMSVals('wiz-ms-prod');}
+    else {WIZ.entity=$('wiz-elec-sel')?.value||WIZ.entity;if(!WIZ.entity){toast("Seleziona l'elettronica",'err');return;}}
+  }
+  if(WIZ.step===4 && dir>0 && WIZ.assoc==='electronic_excl'){WIZ.excl=getMSVals('wiz-ms-excl');}
+  // Skip step 4 if not electronic_excl
+  let next=WIZ.step+dir;
+  if(next===4 && WIZ.assoc!=='electronic_excl') next+=dir;
+  WIZ.step=Math.max(1,Math.min(6,next));
+  renderWizard();
+}
+function saveContent() {
+  if(!WIZ.title){toast('Inserisci un titolo','err');return;}
+  if(WIZ.assoc==='product') {
+    WIZ.selProds.forEach(pid=>DB.contents.push({id:'c'+uid(),title:WIZ.title,type:WIZ.type,level:'product',entity:pid,excl:[],desc:WIZ.desc,url:WIZ.url||'#',rev:WIZ.rev||'v1.0',date:today(),visible:true}));
+  } else {
+    const level=WIZ.assoc==='electronic_excl'?'electronic':WIZ.assoc;
+    DB.contents.push({id:'c'+uid(),title:WIZ.title,type:WIZ.type,level,entity:WIZ.entity,excl:WIZ.excl,desc:WIZ.desc,url:WIZ.url||'#',rev:WIZ.rev||'v1.0',date:today(),visible:true});
+  }
+  closeModal(); renderACont(); initHome(); toast('✓ Contenuto salvato','ok');
+}
+
+// ══════════════════════════════════════
+// MULTI-SELECT WIDGET
+// ══════════════════════════════════════
+function renderMS(id, selected, items, isExcl=false) {
+  return `<div class="ms-wrap" id="${id}">
+    <div class="ms-search"><input type="text" placeholder="🔍 Cerca…" oninput="filterMS('${id}',this.value)"></div>
+    <div class="ms-list">${items.map(p=>`<div class="ms-item ${selected.includes(p.id)?'sel':''}" data-id="${p.id}" onclick="toggleMS(this,'${id}')">
+      <input type="checkbox" ${selected.includes(p.id)?'checked':''} onclick="event.stopPropagation()">
+      <span style="font-size:15px">${p.emoji}</span>
+      <div><div class="ms-item-name">${p.name}</div><div class="ms-item-sub">${getElec(p.elec)?.name||''} — ${p.codes[0]}</div></div>
+    </div>`).join('')}</div>
+    <div class="ms-foot">${isExcl?'Da escludere':'Selezionati'}: <strong id="${id}-cnt">${selected.length}</strong></div>
+  </div>`;
+}
+function filterMS(id,q){document.querySelectorAll(`#${id} .ms-item`).forEach(el=>{el.style.display=!q||el.textContent.toLowerCase().includes(q.toLowerCase())?'':'none';});}
+function toggleMS(el,id){el.classList.toggle('sel');el.querySelector('input').checked=el.classList.contains('sel');$(`${id}-cnt`).textContent=document.querySelectorAll(`#${id} .ms-item.sel`).length;}
+function getMSVals(id){return Array.from(document.querySelectorAll(`#${id} .ms-item.sel`)).map(el=>el.dataset.id).filter(Boolean);}
+
+// ══════════════════════════════════════
+// DUPLICATE MODAL
+// ══════════════════════════════════════
+function openDupModal(kind) {
+  const items=kind==='param'?DB.params:DB.alarms;
+  openModal('Duplica '+(kind==='param'?'Parametri':'Allarmi'),`
+    <div class="fg"><label class="f-label">Sorgente — ${kind==='param'?'Parametri':'Allarmi'} da duplicare</label>
+      <select class="f-sel" id="dup-src">
+        <option value="">— Seleziona —</option>
+        <optgroup label="Da prodotto">${DB.products.map(p=>`<option value="product:${p.id}">${p.emoji} ${p.name}</option>`).join('')}</optgroup>
+        <optgroup label="Da elettronica">${DB.electronics.map(e=>`<option value="electronic:${e.id}">${e.icon} ${e.name}</option>`).join('')}</optgroup>
+      </select>
+    </div>
+    <div class="fg"><label class="f-label">Destinazione</label>
+      <select class="f-sel" id="dup-dst">
+        <option value="">— Seleziona —</option>
+        <optgroup label="A prodotti">${DB.products.map(p=>`<option value="product:${p.id}">${p.emoji} ${p.name}</option>`).join('')}</optgroup>
+        <optgroup label="A elettronica">${DB.electronics.map(e=>`<option value="electronic:${e.id}">${e.icon} ${e.name}</option>`).join('')}</optgroup>
+      </select>
+    </div>
+    <div class="fg"><label class="f-label">Modalità</label>
+      <select class="f-sel" id="dup-mode">
+        <option value="add">Aggiungi ai contenuti esistenti</option>
+        <option value="replace">Sostituisci completamente</option>
+      </select>
+    </div>`,
+    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" onclick="executeDup('${kind}')">⧉ Duplica</button>`,'sm');
+}
+function executeDup(kind) {
+  const src=$('dup-src')?.value, dst=$('dup-dst')?.value, mode=$('dup-mode')?.value;
+  if(!src||!dst){toast('Seleziona sorgente e destinazione','err');return;}
+  const [srcLev,srcId]=src.split(':'), [dstLev,dstId]=dst.split(':');
+  const db=kind==='param'?DB.params:DB.alarms;
+  const toCopy=db.filter(x=>x.level===srcLev&&x.entity===srcId);
+  if(!toCopy.length){toast('Nessun elemento trovato nella sorgente','err');return;}
+  if(mode==='replace') { if(kind==='param') DB.params=DB.params.filter(x=>!(x.level===dstLev&&x.entity===dstId)); else DB.alarms=DB.alarms.filter(x=>!(x.level===dstLev&&x.entity===dstId)); }
+  toCopy.forEach(x=>{ const copy={...x,id:(kind==='param'?'pa':'al')+uid(),level:dstLev,entity:dstId,excl:[]}; if(kind==='param')DB.params.push(copy); else DB.alarms.push(copy); });
+  closeModal(); renderAllAdmin(); toast(`✓ Duplicati ${toCopy.length} ${kind==='param'?'parametri':'allarmi'}`,'ok');
+}
+
+// ══════════════════════════════════════
+// EXCEL IMPORT
+// ══════════════════════════════════════
+const TEMPLATES = {
+  products: 'nome,codice,tipo,elettronica,famiglia,descrizione,prefisso_matricola,stato\nSlim,ASL05AIR.015,Stufa a pellet,The Mind,Stufe a Pellet,Descrizione prodotto,ASL,attivo',
+  params: 'codice,nome,descrizione,range,unita,default,note\nP1,Carico Pellet P1,Carico pellet potenza minima,0-100,%,50,Note tecniche',
+  alarms: 'codice,titolo,descrizione,causa,soluzione,priorita,note\nH1,No Depression,Sensore flusso sotto soglia,Tiraggio insufficiente,Verificare canna fumaria,Alta,Note aggiuntive',
+};
+let _impData = null;
+
+function openXlsImport(type) {
+  const labels={products:'Prodotti',params:'Parametri',alarms:'Allarmi'};
+  openModal('Importa '+labels[type]+' da Excel', `
+    ${type!=='products'?`<div class="fg2">
+      <div class="fg"><label class="f-label">Livello</label><select class="f-sel" id="xi-level"><option value="product">Singolo prodotto</option><option value="electronic">Intera elettronica</option></select></div>
+      <div class="fg"><label class="f-label">Entità</label><select class="f-sel" id="xi-entity">
+        <optgroup label="Prodotti">${DB.products.filter(p=>p.active).map(p=>`<option value="product:${p.id}">${p.name}</option>`).join('')}</optgroup>
+        <optgroup label="Elettroniche">${DB.electronics.map(e=>`<option value="electronic:${e.id}">${e.name}</option>`).join('')}</optgroup>
+      </select></div>
+      <div class="fg"><label class="f-label">Modalità</label><select class="f-sel" id="xi-mode"><option value="add">Aggiungi</option><option value="update">Aggiorna esistenti</option><option value="replace">Sostituisci tutto</option></select></div>
+    </div>`:''}
+    <div class="xls-drop" id="xi-drop" onclick="$('xi-file').click()"
+      ondragover="event.preventDefault();this.classList.add('drag')"
+      ondragleave="this.classList.remove('drag')"
+      ondrop="event.preventDefault();this.classList.remove('drag');xDrop(event,'${type}')">
+      <input type="file" id="xi-file" accept=".csv" style="display:none" onchange="xSelect(this,'${type}')">
+      <div class="xls-drop-ic">📊</div>
+      <div class="xls-drop-l">Trascina il file CSV qui</div>
+      <div class="xls-drop-s">.csv — oppure clicca per sfogliare</div>
+    </div>
+    <div style="margin-top:9px"><button class="btn btn-s" onclick="dlTemplate('${type}')">↓ Scarica template CSV</button></div>
+    <div id="xi-prev"></div>`,
+    `<button class="btn btn-s" onclick="closeModal()">Annulla</button><button class="btn btn-p" id="xi-confirm" style="display:none" onclick="confirmImport('${type}')">✓ Conferma importazione</button>`,'lg');
+}
+function xSelect(input,type){if(input.files[0])parseCSV(input.files[0],type);}
+function xDrop(e,type){if(e.dataTransfer.files[0])parseCSV(e.dataTransfer.files[0],type);}
+function parseCSV(file,type) {
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const lines=e.target.result.trim().split('\n').map(l=>l.split(',').map(v=>v.trim().replace(/^"|"$/g,'')));
+    const headers=lines[0], rows=lines.slice(1).filter(r=>r.length>1&&r[0]);
+    const parsed=rows.map(r=>{const o={};headers.forEach((h,i)=>{o[h]=r[i]||'';});return o;});
+    showImportPreview(parsed,type);
+  };
+  reader.readAsText(file);
+}
+function showImportPreview(rows,type) {
+  const validated=rows.map(r=>{
+    let st='ok', warn=[];
+    if(type==='products'){if(!r.nome){st='err';warn.push('Nome mancante');}if(r.elettronica&&!DB.electronics.find(e=>e.name.toLowerCase()===r.elettronica.toLowerCase())){st='warn';warn.push('Elettronica non trovata: '+r.elettronica);}}
+    else if(type==='params'){if(!r.codice){st='err';warn.push('Codice mancante');}if(!r.nome){st='warn';warn.push('Nome mancante');}}
+    else if(type==='alarms'){if(!r.codice){st='err';warn.push('Codice mancante');}if(!r.titolo){st='warn';warn.push('Titolo mancante');}}
+    return{...r,_st:st,_w:warn};
+  });
+  _impData={rows:validated,type};
+  const ok=validated.filter(r=>r._st==='ok').length, warn=validated.filter(r=>r._st==='warn').length, err=validated.filter(r=>r._st==='err').length;
+  const keys=Object.keys(rows[0]||{}).filter(k=>!k.startsWith('_'));
+  $('xi-prev').innerHTML=`<div class="imp-prev">
+    <div class="imp-prev-hdr">Anteprima — ${rows.length} righe</div>
+    <div style="overflow-x:auto"><table class="imp-tbl">
+      <thead><tr>${keys.map(k=>`<th>${k}</th>`).join('')}<th>Stato</th></tr></thead>
+      <tbody>${validated.map(r=>`<tr class="row-${r._st}">${keys.map(k=>`<td>${r[k]||'—'}</td>`).join('')}<td>${r._st==='ok'?'✅':r._st==='warn'?'⚠ '+r._w.join(', '):'❌ '+r._w.join(', ')}</td></tr>`).join('')}</tbody>
+    </table></div>
+    <div class="imp-stats"><span>✅ ${ok} ok</span><span>⚠ ${warn} avvisi</span><span>❌ ${err} errori</span></div>
+  </div>`;
+  if(ok+warn>0){const c=$('xi-confirm');if(c)c.style.display='inline-flex';}
+}
+function confirmImport(type) {
+  if(!_impData) return;
+  const {rows}=_impData;
+  const level=$('xi-level')?.value||'product';
+  const ev=$('xi-entity')?.value||'';
+  const [eLev,eId]=ev.split(':');
+  const entity=eId||'';
+  const mode=$('xi-mode')?.value||'add';
+  const valid=rows.filter(r=>r._st!=='err');
+  if(mode==='replace'){if(type==='params')DB.params=DB.params.filter(p=>!(p.level===level&&p.entity===entity));else if(type==='alarms')DB.alarms=DB.alarms.filter(a=>!(a.level===level&&a.entity===entity));}
+  valid.forEach(r=>{
+    if(type==='params'){
+      const ex=mode==='update'&&DB.params.find(p=>p.code===r.codice&&p.level===level&&p.entity===entity);
+      if(ex){ex.name=r.nome||ex.name;ex.range=r.range||ex.range;ex.def=r.default||ex.def;}
+      else DB.params.push({id:'pa'+uid(),code:r.codice,name:r.nome||r.codice,desc:r.descrizione||'',range:r.range||'',unit:r.unita||'',def:r.default||'',notes:r.note||'',level,entity,excl:[]});
+    } else if(type==='alarms'){
+      const ex=mode==='update'&&DB.alarms.find(a=>a.code===r.codice&&a.level===level&&a.entity===entity);
+      if(ex){ex.title=r.titolo||ex.title;ex.solution=r.soluzione||ex.solution;}
+      else DB.alarms.push({id:'al'+uid(),code:r.codice,title:r.titolo||r.codice,desc:r.descrizione||'',cause:r.causa||'',solution:r.soluzione||'',notes:r.note||'',priority:r.priorita||'Media',level,entity,excl:[]});
+    } else if(type==='products'){
+      const elec=DB.electronics.find(e=>e.name.toLowerCase()===(r.elettronica||'').toLowerCase());
+      const fam=DB.families.find(f=>f.name.toLowerCase()===(r.famiglia||'').toLowerCase());
+      DB.products.push({id:'p'+uid(),name:r.nome,emoji:'🔥',codes:[r.codice||r.nome],type:r.tipo||'Stufa a pellet',elec:elec?.id||'',family:fam?.id||'',app:'',active:(r.stato||'attivo').toLowerCase()==='attivo',desc:r.descrizione||''});
+    }
+  });
+  closeModal(); renderAllAdmin(); initHome(); toast(`✓ Importati ${valid.length} record`,'ok');
+}
+function dlTemplate(type){const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(TEMPLATES[type]||'');a.download=`template_${type}.csv`;a.click();}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+initHome();
+</script>
+</body>
+</html>
